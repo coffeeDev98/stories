@@ -85,7 +85,7 @@ const Video = ({
         onError={(err) => {
           console.log("ON_ERROR:", err);
         }}
-        controls
+        // controls
         playsInline
         autoPlay
       />
