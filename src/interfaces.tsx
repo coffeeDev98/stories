@@ -22,10 +22,18 @@ export interface GlobalCtx {
   preloadCount?: number;
 }
 
+export interface StoriesContext {
+  loaded: boolean;
+  setLoaded: Function;
+}
+
 export interface ProgressContext {
-  currentId: number;
-  videoDuration: number;
+  currentId: { step: number; clip: number };
+  stepDuration: number;
+  clipDuration: number;
   bufferAction?: boolean;
   pause: boolean;
-  next?: Function;
+  next: Function;
 }
+
+export type Action = (action: string) => void;

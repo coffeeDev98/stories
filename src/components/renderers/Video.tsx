@@ -1,28 +1,71 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { RippleLoader } from "../RippleLoader";
+import { Action, StoriesContext } from "../../interfaces";
+import StoriesCtx from "../../context/Stories";
 
 type Props = {
   story: any;
-  getStepAndClipDurations: any;
-  onEnded: () => void;
+  getClipDuration: any;
+  //   onEnded: () => void;
+  isPaused: boolean;
+  action: Action;
 };
 
-const Video = ({ story, getStepAndClipDurations, onEnded }: Props) => {
-  const [loaded, setLoaded] = React.useState(false);
+const Video = ({
+  story,
+  getClipDuration,
+  //   onEnded,
+  isPaused = false,
+  action,
+}: Props) => {
+  // const [loaded, setLoaded] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
-
   let vid = React.useRef<HTMLVideoElement>(null);
+  const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
+
+  useEffect(() => {
+    console.log("IS_PAUSED: ", isPaused);
+    if (vid.current) {
+      if (isPaused) {
+        vid.current.pause();
+      } else {
+        vid.current.play().catch((err) => {
+          console.log(err);
+        });
+      }
+    }
+  }, [isPaused]);
+  //   useEffect(() => {
+  //     if (vid.current) {
+  //       vid.current.addEventListener("loadeddata", (e: any) => {
+  //         console.log("WAITING...", e.target?.readyState);
+  //       });
+  //     }
+  //   }, [vid.current]);
+
+  const onWaiting = () => {
+    console.log("ON_WAITING");
+    action("pause");
+  };
+
+  const onPlaying = () => {
+    action("play");
+  };
 
   const videoLoaded = () => {
-    getStepAndClipDurations(vid.current?.duration);
+    getClipDuration(vid.current?.duration);
     setLoaded(true);
-    if (vid.current) {
+    if (vid.current && !isPaused) {
       vid.current
         .play()
-        .then(() => {})
+        .then(() => {
+          action("play");
+        })
         .catch(() => {
           setMuted(true);
-          vid.current?.play().finally(() => {});
+          vid.current?.play().finally(() => {
+            action("play");
+          });
         });
     }
   };
@@ -33,21 +76,18 @@ const Video = ({ story, getStepAndClipDurations, onEnded }: Props) => {
         // id={`clip-${index}.${idx}`}
         ref={vid}
         src={story.url}
-        //   onEnded={handleStoryEnd}
-        controls
-        playsInline={true}
-        autoPlay={false}
         webkit-playsinline="true"
         preload="auto"
         muted={muted}
+        onWaiting={onWaiting}
+        onPlaying={onPlaying}
         onLoadedData={videoLoaded}
-        onLoadedMetadata={(e: any) => {
-          //   reqAnimationFrame(storyRef.current || []);
-        }}
-        onEnded={onEnded}
         onError={(err) => {
           console.log("ON_ERROR:", err);
         }}
+        controls
+        playsInline
+        autoPlay
       />
       {!loaded && (
         <div

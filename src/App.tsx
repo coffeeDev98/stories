@@ -1,5 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Video from "./components/renderers/Video";
+import ProgressContext from "./context/Progress";
+import StoriesContext from "./context/Stories";
+import ProgressArray from "./components/ProgressArray";
 
 type Props = {};
 
@@ -87,8 +90,8 @@ const getStepDuration = async (step: any[], stepId: number) => {
 const App = (props: Props) => {
   const storyClips = testData;
   const [stories, setStories] = useState<any>([]);
-  const [stepDuration, setStepDuration] = useState<number>();
-  const [clipDuration, setClipDuration] = useState<number>();
+  const [stepDuration, setStepDuration] = useState<number>(0);
+  const [clipDuration, setClipDuration] = useState<number>(0);
   const [pause, setPause] = useState<boolean>(false);
   const [currentId, setCurrentId] = useState<{ step: number; clip: number }>({
     step: 0,
@@ -108,12 +111,13 @@ const App = (props: Props) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [disableKeyEvent]);
-  useEffect(() => {
-    console.log("DATA:", stepDuration);
-  }, [stepDuration]);
+  useLayoutEffect(() => {
+    console.log("CURRENT_ID:", currentId);
+    setLoaded(false);
+  }, [currentId]);
   useEffect(() => {
     setStories(() => {
-      return testData.map((step: any, index) => {
+      return storyClips.map((step: any, index) => {
         return step.map((clip: any, idx: number) => {
           return Video;
         });
@@ -122,9 +126,22 @@ const App = (props: Props) => {
   }, []);
   useEffect(() => {
     getStepDuration(storyClips[currentId.step], currentId.step).then((d) => {
-      setStepDuration(d);
+      setStepDuration(d * 1000);
     });
   }, [currentId.step]);
+  useEffect(() => {
+    console.log("SETTING_LOADED: ", loaded);
+  }, [loaded]);
+
+  const action = (action: "pause" | "play") => {
+    setPause(() => action === "pause");
+  };
+
+  const togglePause = (forceState?: boolean) => {
+    setPause((prev) => {
+      return forceState ? forceState : !prev;
+    });
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     e.stopPropagation();
@@ -134,7 +151,7 @@ const App = (props: Props) => {
       next();
     } else if (e.key === " ") {
       e.preventDefault();
-      // togglePause(false);
+      togglePause();
     }
   };
   const next = () => {
@@ -165,18 +182,40 @@ const App = (props: Props) => {
   const CurrentVideo = stories?.[currentId.step]?.[currentId.clip];
   return (
     <div>
-      {CurrentVideo && (
-        <CurrentVideo
-          story={storyClips[currentId.step][currentId.clip]}
-          getStepAndClipDurations={(cd: any) => {
-            setClipDuration(cd);
-            // setLoaded(true);
-          }}
-          onEnded={() => {
-            next();
-          }}
-        />
-      )}
+      <StoriesContext.Provider
+        value={{
+          loaded,
+          setLoaded,
+        }}
+      >
+        {clipDuration && (
+          <ProgressContext.Provider
+            value={{
+              currentId,
+              stepDuration,
+              clipDuration,
+              pause,
+              next,
+            }}
+          >
+            <ProgressArray />
+          </ProgressContext.Provider>
+        )}
+        {CurrentVideo && (
+          <CurrentVideo
+            story={storyClips[currentId.step][currentId.clip]}
+            getClipDuration={(cd: any) => {
+              setClipDuration(cd * 1000);
+              // setLoaded(true);
+            }}
+            isPaused={pause}
+            action={action}
+            //   onEnded={() => {
+            //     next();
+            //   }}
+          />
+        )}
+      </StoriesContext.Provider>
       {/* {stories.length > 0 &&
         stories?.map((step: any, index: number) => {
           return step.map((Clip: any, idx: number) => {
