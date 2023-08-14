@@ -31,6 +31,7 @@ export interface ProgressContext {
   currentId: { step: number; clip: number };
   stepDuration: number;
   clipDuration: number;
+  setClipDuration: Function;
   bufferAction?: boolean;
   pause: boolean;
   next: Function;

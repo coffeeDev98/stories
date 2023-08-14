@@ -13,8 +13,14 @@ const ProgressArray = (props: Props) => {
 
   let animationFrameId = useRef<number>(-1);
 
-  const { currentId, stepDuration, clipDuration, pause, next } =
-    useContext<ProgressContext>(ProgressCtx);
+  const {
+    currentId,
+    stepDuration,
+    clipDuration,
+    setClipDuration,
+    pause,
+    next,
+  } = useContext<ProgressContext>(ProgressCtx);
   const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
 
   useEffect(() => {
@@ -45,28 +51,37 @@ const ProgressArray = (props: Props) => {
     lastTime.current = t;
     setStepProgress((count: number) => {
       const stepInterval = stepDuration;
-      stepProgressCopy = count + (dt * 100) / stepInterval;
+      if (stepInterval > 0) {
+        stepProgressCopy = count + (dt * 100) / stepInterval;
+        if (stepProgressCopy < 100) {
+          animationFrameId.current = requestAnimationFrame(incrementCount);
+        } else {
+          //   storyEndCallback();
+          cancelAnimationFrame(animationFrameId.current);
+
+          // console.log("CHANGING_STEP_CLIP: ", stepProgressCopy, stepDuration);
+          setClipDuration(0);
+          next();
+        }
+      }
       return stepProgressCopy;
     });
-    if (stepProgressCopy < 100) {
-      animationFrameId.current = requestAnimationFrame(incrementCount);
-    } else {
-      //   storyEndCallback();
-      cancelAnimationFrame(animationFrameId.current);
-      next();
-    }
 
     //   clip progress
     setClipProgress((count: number) => {
       const clipInterval = clipDuration;
-      clipProgressCopy = count + (dt * 100) / clipInterval;
+      if (clipInterval > 0) {
+        clipProgressCopy = count + (dt * 100) / clipInterval;
+        console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
+
+        if (clipProgressCopy >= 100) {
+          // console.log("CHANGING_STEP_CLIP: ", clipProgressCopy, clipDuration);
+          setClipDuration(0);
+          next();
+        }
+      }
       return clipProgressCopy;
     });
-    console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
-
-    if (clipProgressCopy > 100) {
-      next();
-    }
   };
 
   const getCurrentInterval = () => {

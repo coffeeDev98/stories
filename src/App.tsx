@@ -158,13 +158,17 @@ const App = (props: Props) => {
     setCurrentId((prev) => {
       if (prev.step < storyClips.length - 1) {
         if (prev.clip < storyClips[prev.step].length - 1) {
+          // console.log("CLIP: ", { ...prev, clip: prev.clip + 1 });
           return { ...prev, clip: prev.clip + 1 };
         } else {
+          // console.log("CLIP: ", { step: prev.step + 1, clip: 0 });
           return { step: prev.step + 1, clip: 0 };
         }
       } else if (prev.clip < storyClips[prev.step].length - 1) {
+        // console.log("CLIP: ", { ...prev, clip: prev.clip + 1 });
         return { ...prev, clip: prev.clip + 1 };
       } else {
+        // console.log("CLIP: ", { step: 0, clip: 0 });
         return { step: 0, clip: 0 };
       }
       return prev;
@@ -194,6 +198,7 @@ const App = (props: Props) => {
               currentId,
               stepDuration,
               clipDuration,
+              setClipDuration,
               pause,
               next,
             }}
@@ -205,6 +210,7 @@ const App = (props: Props) => {
           <CurrentVideo
             story={storyClips[currentId.step][currentId.clip]}
             getClipDuration={(cd: any) => {
+              // console.log("GETTING_CLIP_DURATIOM: ", currentId, cd);
               setClipDuration(cd * 1000);
               // setLoaded(true);
             }}

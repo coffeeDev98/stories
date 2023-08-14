@@ -52,10 +52,10 @@ const Video = ({
     action("play");
   };
 
-  const videoLoaded = () => {
-    getClipDuration(vid.current?.duration);
-    setLoaded(true);
+  const videoLoaded = (e: any) => {
     if (vid.current && !isPaused) {
+      getClipDuration(vid.current?.duration);
+      setLoaded(true);
       vid.current
         .play()
         .then(() => {
