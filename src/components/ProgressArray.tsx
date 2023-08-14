@@ -9,12 +9,20 @@ type Props = {};
 const ProgressArray = (props: Props) => {
   const [stepProgress, setStepProgress] = useState<number>(0);
   const [clipProgress, setClipProgress] = useState<number>(0);
+  const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
   const lastTime = useRef<number>();
 
   let animationFrameId = useRef<number>(-1);
 
-  const { currentId, stepDuration, clipDuration, pause, next } =
-    useContext<ProgressContext>(ProgressCtx);
+  const {
+    currentId,
+    stepDuration,
+    clipDuration,
+    pause,
+    togglePause,
+    previous,
+    next,
+  } = useContext<ProgressContext>(ProgressCtx);
   const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
 
   useEffect(() => {
@@ -35,6 +43,16 @@ const ProgressArray = (props: Props) => {
       cancelAnimationFrame(animationFrameId.current);
     };
   }, [currentId.step, pause, stepDuration, loaded]);
+
+  useEffect(() => {
+    if (!disableKeyEvent) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [disableKeyEvent]);
 
   let stepProgressCopy = stepProgress;
   let clipProgressCopy = clipProgress;
@@ -72,6 +90,18 @@ const ProgressArray = (props: Props) => {
       }
       return clipProgressCopy;
     });
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === "ArrowLeft") {
+      previous();
+    } else if (e.key === "ArrowRight") {
+      next();
+    } else if (e.key === " ") {
+      e.preventDefault();
+      togglePause();
+    }
   };
 
   const getCurrentInterval = () => {

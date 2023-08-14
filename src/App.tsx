@@ -99,19 +99,8 @@ const App = (props: Props) => {
     clip: 0,
   });
 
-  const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
-
   const [loaded, setLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!disableKeyEvent) {
-      document.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [disableKeyEvent]);
   useLayoutEffect(() => {
     console.log("CURRENT_ID:", currentId);
     setLoaded(false);
@@ -144,17 +133,6 @@ const App = (props: Props) => {
     });
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.key === "ArrowLeft") {
-      previous();
-    } else if (e.key === "ArrowRight") {
-      next();
-    } else if (e.key === " ") {
-      e.preventDefault();
-      togglePause();
-    }
-  };
   const next = () => {
     setCurrentId((prev) => {
       if (prev.step < storyClips.length - 1) {
@@ -196,6 +174,8 @@ const App = (props: Props) => {
               stepDuration,
               clipDuration,
               pause,
+              togglePause,
+              previous,
               next,
             }}
           >

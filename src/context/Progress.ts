@@ -7,5 +7,7 @@ export default React.createContext<ProgressContext>({
   clipDuration: 0,
   //   bufferAction: false,
   pause: false,
+  togglePause: () => {},
+  previous: () => {},
   next: () => {},
 });

@@ -40,6 +40,8 @@ export interface ProgressContext {
   // setClipDuration: Function;
   bufferAction?: boolean;
   pause: boolean;
+  togglePause: Function;
+  previous: Function;
   next: Function;
 }
 
