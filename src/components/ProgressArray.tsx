@@ -19,6 +19,7 @@ const ProgressArray = (props: Props) => {
 
   useEffect(() => {
     setStepProgress(0);
+    setClipProgress(0);
   }, [currentId.step, stepDuration]);
   useEffect(() => {
     setClipProgress(0);
@@ -26,7 +27,7 @@ const ProgressArray = (props: Props) => {
 
   useEffect(() => {
     if (!pause && loaded) {
-      console.log("STARTING PROGRESS");
+      // console.log("STARTING PROGRESS");
       animationFrameId.current = requestAnimationFrame(incrementCount);
       lastTime.current = timestamp();
     }
@@ -45,28 +46,32 @@ const ProgressArray = (props: Props) => {
     lastTime.current = t;
     setStepProgress((count: number) => {
       const stepInterval = stepDuration;
-      stepProgressCopy = count + (dt * 100) / stepInterval;
+      if (stepInterval > 0) {
+        stepProgressCopy = count + (dt * 100) / stepInterval;
+        if (stepProgressCopy < 100) {
+          animationFrameId.current = requestAnimationFrame(incrementCount);
+        } else {
+          //   storyEndCallback();
+          cancelAnimationFrame(animationFrameId.current);
+          next();
+        }
+      }
       return stepProgressCopy;
     });
-    if (stepProgressCopy < 100) {
-      animationFrameId.current = requestAnimationFrame(incrementCount);
-    } else {
-      //   storyEndCallback();
-      cancelAnimationFrame(animationFrameId.current);
-      next();
-    }
 
     //   clip progress
     setClipProgress((count: number) => {
       const clipInterval = clipDuration;
-      clipProgressCopy = count + (dt * 100) / clipInterval;
+      if (clipInterval > 0) {
+        clipProgressCopy = count + (dt * 100) / clipInterval;
+        // console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
+
+        if (clipProgressCopy > 100) {
+          next();
+        }
+      }
       return clipProgressCopy;
     });
-    console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
-
-    if (clipProgressCopy > 100) {
-      next();
-    }
   };
 
   const getCurrentInterval = () => {

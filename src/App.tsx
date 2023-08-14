@@ -3,6 +3,7 @@ import Video from "./components/renderers/Video";
 import ProgressContext from "./context/Progress";
 import StoriesContext from "./context/Stories";
 import ProgressArray from "./components/ProgressArray";
+import { Story } from "./interfaces";
 
 type Props = {};
 
@@ -88,7 +89,7 @@ const getStepDuration = async (step: any[], stepId: number) => {
 };
 
 const App = (props: Props) => {
-  const storyClips = testData;
+  const storyClips: Story = testData;
   const [stories, setStories] = useState<any>([]);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [clipDuration, setClipDuration] = useState<number>(0);
