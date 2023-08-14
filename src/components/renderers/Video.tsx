@@ -35,9 +35,6 @@ const Video = ({
       }
     }
   }, [isPaused]);
-  useLayoutEffect(() => {
-    setLoaded(false);
-  }, []);
   //   useEffect(() => {
   //     if (vid.current) {
   //       vid.current.addEventListener("loadeddata", (e: any) => {
