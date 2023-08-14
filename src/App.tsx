@@ -198,7 +198,6 @@ const App = (props: Props) => {
               currentId,
               stepDuration,
               clipDuration,
-              setClipDuration,
               pause,
               next,
             }}

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { RippleLoader } from "../RippleLoader";
 import { Action, StoriesContext } from "../../interfaces";
 import StoriesCtx from "../../context/Stories";
@@ -35,6 +35,9 @@ const Video = ({
       }
     }
   }, [isPaused]);
+  useLayoutEffect(() => {
+    setLoaded(false);
+  }, []);
   //   useEffect(() => {
   //     if (vid.current) {
   //       vid.current.addEventListener("loadeddata", (e: any) => {
@@ -52,7 +55,7 @@ const Video = ({
     action("play");
   };
 
-  const videoLoaded = (e: any) => {
+  const videoLoaded = () => {
     if (vid.current && !isPaused) {
       getClipDuration(vid.current?.duration);
       setLoaded(true);

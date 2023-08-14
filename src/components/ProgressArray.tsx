@@ -13,14 +13,8 @@ const ProgressArray = (props: Props) => {
 
   let animationFrameId = useRef<number>(-1);
 
-  const {
-    currentId,
-    stepDuration,
-    clipDuration,
-    setClipDuration,
-    pause,
-    next,
-  } = useContext<ProgressContext>(ProgressCtx);
+  const { currentId, stepDuration, clipDuration, pause, next } =
+    useContext<ProgressContext>(ProgressCtx);
   const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
 
   useEffect(() => {
@@ -60,7 +54,6 @@ const ProgressArray = (props: Props) => {
           cancelAnimationFrame(animationFrameId.current);
 
           // console.log("CHANGING_STEP_CLIP: ", stepProgressCopy, stepDuration);
-          setClipDuration(0);
           next();
         }
       }
@@ -72,11 +65,10 @@ const ProgressArray = (props: Props) => {
       const clipInterval = clipDuration;
       if (clipInterval > 0) {
         clipProgressCopy = count + (dt * 100) / clipInterval;
-        console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
+        // console.log("COUNT_COPY: ", clipProgressCopy, clipDuration);
 
-        if (clipProgressCopy >= 100) {
+        if (clipProgressCopy > 100) {
           // console.log("CHANGING_STEP_CLIP: ", clipProgressCopy, clipDuration);
-          setClipDuration(0);
           next();
         }
       }
