@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const htmlPlugin = new HtmlWebpackPlugin({
   template: path.join(__dirname, "public", "index.html"),
@@ -24,7 +25,12 @@ module.exports = {
     filename: "bundle.js",
     path: path.resolve(__dirname, "build"),
   },
-  plugins: [htmlPlugin],
+  plugins: [
+    htmlPlugin,
+    new CopyWebpackPlugin({
+      patterns: [{ from: "public/ios-video-sw.js" }],
+    }),
+  ],
 
   devServer: {
     static: { directory: path.join(__dirname, "build") },

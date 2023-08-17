@@ -4,6 +4,7 @@ import ProgressContext from "./context/Progress";
 import StoriesContext from "./context/Stories";
 import ProgressArray from "./components/ProgressArray";
 import { Story } from "./interfaces";
+import usePrefetch from "./hooks/usePrefetch";
 
 type Props = {};
 
@@ -101,17 +102,20 @@ const App = (props: Props) => {
 
   const [loaded, setLoaded] = useState<boolean>(false);
 
+  usePrefetch(storyClips, currentId);
+
   useLayoutEffect(() => {
-    console.log("CURRENT_ID:", currentId);
+    console.log("cursor:", currentId);
     setLoaded(false);
   }, [currentId]);
   useEffect(() => {
     setStories(() => {
-      return storyClips.map((step: any, index) => {
+      const temp = storyClips.map((step: any, index) => {
         return step.map((clip: any, idx: number) => {
-          return Video;
+          return Video({ step: index, clip: idx });
         });
       });
+      return temp;
     });
   }, []);
   useEffect(() => {
@@ -119,9 +123,9 @@ const App = (props: Props) => {
       setStepDuration(d * 1000);
     });
   }, [currentId.step]);
-  useEffect(() => {
-    console.log("SETTING_LOADED: ", loaded);
-  }, [loaded]);
+  // useEffect(() => {
+  //   console.log("SETTING_LOADED: ", loaded);
+  // }, [loaded]);
 
   const action = (action: "pause" | "play") => {
     setPause(() => action === "pause");
