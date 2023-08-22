@@ -1,11 +1,10 @@
 type NumberOrString = number | string;
 
-export type Story = Array<
-  Array<{
-    url: string;
-    type: string;
-  }>
->;
+export type Story = {
+  url: string;
+  type: string;
+};
+
 export interface GlobalCtx {
   width?: NumberOrString;
   height?: NumberOrString;
@@ -31,6 +30,7 @@ export interface GlobalCtx {
 export interface StoriesContext {
   loaded: boolean;
   setLoaded: Function;
+  cursor: { step: number; clip: number };
 }
 
 export interface ProgressContext {

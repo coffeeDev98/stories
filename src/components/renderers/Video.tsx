@@ -16,49 +16,50 @@ const Video =
     // const [loaded, setLoaded] = React.useState(false);
     const [muted, setMuted] = React.useState(false);
     let vid = React.useRef<HTMLVideoElement>(null);
-    const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
+    const { cursor, loaded, setLoaded } =
+      React.useContext<StoriesContext>(StoriesCtx);
 
     useEffect(() => {
-      // console.log("IS_PAUSED: ", isPaused);
+      if (vid.current) {
+        vid.current.currentTime = 0;
+      }
+    }, [cursor, vid.current]);
+
+    useEffect(() => {
       if (vid.current) {
         if (isPaused) {
           vid.current.pause();
         } else {
           vid.current.play().catch((err) => {
-            console.log(err);
+            console.log("playback error => ", err);
           });
         }
       }
     }, [isPaused]);
-    //   useEffect(() => {
-    //     if (vid.current) {
-    //       vid.current.addEventListener("loadeddata", (e: any) => {
-    //         console.log("WAITING...", e.target?.readyState);
-    //       });
-    //     }
-    //   }, [vid.current]);
 
     const onWaiting = () => {
-      console.log("ON_WAITING");
-      action("pause");
+      setLoaded(false);
+      // action("pause");
     };
 
     const onPlaying = () => {
+      setLoaded(true);
       action("play");
     };
 
     const videoLoaded = () => {
-      if (vid.current && !isPaused) {
-        getClipDuration(vid.current?.duration);
-        setLoaded(true);
-        vid.current
-          .play()
+      setLoaded(true);
+      getClipDuration(vid.current?.duration);
+      if (!isPaused) {
+        vid?.current
+          ?.play()
           .then(() => {
             action("play");
           })
           .catch(() => {
             setMuted(true);
             vid.current?.play().finally(() => {
+              setMuted(false);
               action("play");
             });
           });
@@ -66,7 +67,7 @@ const Video =
     };
 
     return (
-      <div style={{}}>
+      <div style={{ position: "relative" }}>
         <video
           style={{ width: "100%" }}
           id={`clip-${metadata?.step}.${metadata?.clip}`}
@@ -79,7 +80,7 @@ const Video =
           onPlaying={onPlaying}
           onLoadedData={videoLoaded}
           onError={(err) => {
-            console.log("ON_ERROR:", err);
+            console.log("video error => ", err);
           }}
           // controls
           playsInline

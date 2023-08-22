@@ -57,40 +57,10 @@ const getStepDuration = async (step: any[], stepId: number) => {
     });
   });
   return sum;
-  //   const promise = new Promise((resolve, reject) => {
-  //     stories?.map(async (step: any, index: number) => {
-  //       try {
-  //         const clipPromises: any[] = [];
-  //         step.map((clip: any, idx: number) => {
-  //           clipPromises[idx] = new Promise(function (resolve, reject) {
-  //             if (!clip.url) return;
-  //             const video = document.createElement("video");
-  //             video.id = `${index}.${idx}`;
-  //             video.src = clip.url;
-  //             video.onloadeddata = () => resolve(video);
-  //             video.onerror = reject;
-  //             return;
-  //           });
-  //         });
-  //         const stepDuration = await Promise.all(clipPromises);
-  //         let sum = 0;
-  //         stepDuration.forEach((step) => (sum += step.duration));
-  //         totalStepDurations[index] = sum;
-  //         resolve(totalStepDurations);
-  //       } catch (err) {
-  //         reject(err);
-  //       }
-  //     });
-  //   });
-  //   Promise.all([promise]).then((values) => {
-  //     setVideoDurations([...values]);
-  //   });
-  //   const d = await Promise.all(promises.flat());
-  //   setVideoDurations(d);
 };
 
 const App = (props: Props) => {
-  const storyClips: Story = testData;
+  const storyClips: Story[][] = testData;
   const [stories, setStories] = useState<any>([]);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [clipDuration, setClipDuration] = useState<number>(0);
@@ -105,9 +75,9 @@ const App = (props: Props) => {
   usePrefetch(storyClips, currentId);
 
   useLayoutEffect(() => {
-    console.log("cursor:", currentId);
-    setLoaded(false);
+    // setLoaded(false);
   }, [currentId]);
+
   useEffect(() => {
     setStories(() => {
       const temp = storyClips.map((step: any, index) => {
@@ -123,9 +93,6 @@ const App = (props: Props) => {
       setStepDuration(d * 1000);
     });
   }, [currentId.step]);
-  // useEffect(() => {
-  //   console.log("SETTING_LOADED: ", loaded);
-  // }, [loaded]);
 
   const action = (action: "pause" | "play") => {
     setPause(() => action === "pause");
@@ -158,7 +125,7 @@ const App = (props: Props) => {
       if (prev.step > 0) {
         return { step: prev.step - 1, clip: 0 };
       }
-      return { step: 0, clip: 0 };
+      return { ...prev, clip: 0 };
     });
   };
 
@@ -169,9 +136,10 @@ const App = (props: Props) => {
         value={{
           loaded,
           setLoaded,
+          cursor: currentId,
         }}
       >
-        {clipDuration && (
+        {clipDuration && stepDuration ? (
           <ProgressContext.Provider
             value={{
               currentId,
@@ -185,13 +153,13 @@ const App = (props: Props) => {
           >
             <ProgressArray />
           </ProgressContext.Provider>
-        )}
+        ) : null}
         {CurrentVideo && (
           <CurrentVideo
             story={storyClips[currentId.step][currentId.clip]}
             getClipDuration={(cd: any) => {
               setClipDuration(cd * 1000);
-              // setLoaded(true);
+              setLoaded(true);
             }}
             isPaused={pause}
             action={action}
@@ -201,22 +169,6 @@ const App = (props: Props) => {
           />
         )}
       </StoriesContext.Provider>
-      {/* {stories.length > 0 &&
-        stories?.map((step: any, index: number) => {
-          return step.map((Clip: any, idx: number) => {
-            //   videoDurations.current[index] = [];
-            return (
-              <Clip
-                story={testData[index][idx]}
-                onVideoLoaded={(duration: any) => {
-                  // console.log("DURATION: ", index, idx, duration);
-                  // videoDurations.current[index][idx] = duration;
-                  // setLoaded(true);
-                }}
-              />
-            );
-          });
-        })} */}
     </div>
   );
 };

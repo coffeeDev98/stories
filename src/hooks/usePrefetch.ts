@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Story } from "../interfaces";
-import { isMobile, isSafari } from "../utils";
+import { conver2Dto1DIndex, isMobile, isSafari } from "../utils";
 
 const fetchedCallback: (blobUrl: any, ref: HTMLVideoElement | null) => void = (
   blobUrl,
@@ -10,7 +10,7 @@ const fetchedCallback: (blobUrl: any, ref: HTMLVideoElement | null) => void = (
     ref.src = blobUrl;
   }
 };
-
+// Blob prefetch
 const prefetch: (
   ref: HTMLVideoElement | null,
   url: string,
@@ -57,25 +57,48 @@ const prefetch: (
   xhr.send();
 };
 
+// Caches given Story[] using HTMLImageElement and HTMLVideoElement
+const cacheContent = async (contents: Story[]) => {
+  const promises = contents.map((content) => {
+    return new Promise((resolve, reject) => {
+      if (!content.url) return;
+
+      if (content.type === "video") {
+        const video = document.createElement("video");
+        video.src = content.url;
+        video.onloadeddata = () => resolve("Hmm");
+        video.onerror = reject;
+        return;
+      }
+    });
+  });
+
+  await Promise.all(promises);
+};
+
 const usePrefetch = (
-  storyClips: Story,
-  cursor: { step: number; clip: number }
+  storyClips: Story[][],
+  cursor: { step: number; clip: number },
+  prefetchCount: number = 2
 ) => {
   const { step, clip } = cursor;
   useEffect(() => {
-    const el = document.getElementById(`clip-${step}.${clip}`);
-    if (el) {
-      prefetch(
-        el as HTMLVideoElement,
-        storyClips[step][clip].url,
-        () => {
-          console.log("preload error");
-        },
-        (url: string) => {
-          console.log("prefetched: ", url);
-        }
-      );
-    }
+    const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
+    cacheContent(
+      storyClips.flat().slice(flatIndex + 1, flatIndex + prefetchCount + 1)
+    );
+
+    // const el = document.getElementById(`clip-${step}.${clip}`);
+    // if (el) {
+    //   prefetch(
+    //     el as HTMLVideoElement,
+    //     storyClips[step][clip].url,
+    //     () => {
+    //     },
+    //     (url: string) => {
+    //     }
+    //   );
+    // }
   }, [storyClips, document.getElementById(`clip-${step}.${clip}`), cursor]);
 };
 export default usePrefetch;
