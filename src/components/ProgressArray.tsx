@@ -41,15 +41,15 @@ const ProgressArray = (props: Props) => {
 
   useEffect(() => {
     if (loaded) {
-      if (!pause) {
+      if (!pause && sd.current && cd.current) {
         animationFrameId.current = requestAnimationFrame(incrementCount);
         lastTime.current = timestamp();
       }
-      return () => {
-        cancelAnimationFrame(animationFrameId.current);
-      };
     }
-  }, [currentId.step, pause, loaded]);
+    return () => {
+      cancelAnimationFrame(animationFrameId.current);
+    };
+  }, [currentId.step, pause, loaded, sd.current, cd.current]);
 
   useEffect(() => {
     if (!disableKeyEvent) {
@@ -112,7 +112,6 @@ const ProgressArray = (props: Props) => {
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    const { step, clip } = currentId;
     e.stopPropagation();
     if (e.key === "ArrowLeft") {
       reset();

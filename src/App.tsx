@@ -5,6 +5,7 @@ import StoriesContext from "./context/Stories";
 import ProgressArray from "./components/ProgressArray";
 import { Story } from "./interfaces";
 import usePrefetch from "./hooks/usePrefetch";
+import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
 type Props = {};
 
@@ -64,11 +65,14 @@ const App = (props: Props) => {
   const [stories, setStories] = useState<any>([]);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [clipDuration, setClipDuration] = useState<number>(0);
+  const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [pause, setPause] = useState<boolean>(false);
   const [currentId, setCurrentId] = useState<{ step: number; clip: number }>({
     step: 0,
     clip: 0,
   });
+
+  const fsHandle = useFullScreenHandle();
 
   const [loaded, setLoaded] = useState<boolean>(false);
 
@@ -89,6 +93,8 @@ const App = (props: Props) => {
     });
   }, []);
   useEffect(() => {
+    setStepDuration(0);
+    setClipDuration(0);
     getStepDuration(storyClips[currentId.step], currentId.step).then((d) => {
       setStepDuration(d * 1000);
     });
@@ -154,20 +160,23 @@ const App = (props: Props) => {
             <ProgressArray />
           </ProgressContext.Provider>
         ) : null}
-        {CurrentVideo && (
-          <CurrentVideo
-            story={storyClips[currentId.step][currentId.clip]}
-            getClipDuration={(cd: any) => {
-              setClipDuration(cd * 1000);
-              setLoaded(true);
-            }}
-            isPaused={pause}
-            action={action}
-            //   onEnded={() => {
-            //     next();
-            //   }}
-          />
-        )}
+        <FullScreen handle={fsHandle}>
+          {CurrentVideo && (
+            <CurrentVideo
+              story={storyClips[currentId.step][currentId.clip]}
+              getClipDuration={(cd: any) => {
+                setClipDuration(cd * 1000);
+                // clipDuration.current = cd * 1000;
+                setLoaded(true);
+              }}
+              isPaused={pause}
+              action={action}
+              //   onEnded={() => {
+              //     next();
+              //   }}
+            />
+          )}
+        </FullScreen>
       </StoriesContext.Provider>
     </div>
   );

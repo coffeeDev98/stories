@@ -48,7 +48,7 @@ const Video =
     };
 
     const videoLoaded = () => {
-      setLoaded(true);
+      // setLoaded(true);
       getClipDuration(vid.current?.duration);
       if (!isPaused) {
         vid?.current
