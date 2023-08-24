@@ -26,7 +26,7 @@ const Video =
     }, [cursor, vid.current]);
 
     useEffect(() => {
-      if (vid.current) {
+      if (vid.current && loaded) {
         if (isPaused) {
           vid.current.pause();
         } else {
@@ -35,7 +35,10 @@ const Video =
           });
         }
       }
-    }, [isPaused]);
+    }, [isPaused, loaded]);
+    useEffect(() => {
+      loaded && videoLoaded();
+    }, [loaded]);
 
     const onWaiting = () => {
       setLoaded(false);
@@ -49,7 +52,7 @@ const Video =
 
     const videoLoaded = () => {
       // setLoaded(true);
-      getClipDuration(vid.current?.duration);
+      // getClipDuration(vid.current?.duration);
       if (!isPaused) {
         vid?.current
           ?.play()
@@ -78,7 +81,10 @@ const Video =
           muted={muted}
           onWaiting={onWaiting}
           onPlaying={onPlaying}
-          onLoadedData={videoLoaded}
+          onLoadedMetadata={() => {
+            getClipDuration(vid.current?.duration);
+          }}
+          // onLoadedData={videoLoaded}
           onError={(err) => {
             console.log("video error => ", err);
           }}

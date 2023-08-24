@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Story } from "../interfaces";
 import { conver2Dto1DIndex, isMobile, isSafari } from "../utils";
 
@@ -66,27 +66,36 @@ const cacheContent = async (contents: Story[]) => {
       if (content.type === "video") {
         const video = document.createElement("video");
         video.src = content.url;
-        video.onloadeddata = () => resolve("Hmm");
+        video.onloadeddata = () => resolve(video.duration);
         video.onerror = reject;
         return;
       }
     });
   });
 
-  await Promise.all(promises);
+  return await Promise.all(promises);
 };
 
 const usePrefetch = (
   storyClips: Story[][],
   cursor: { step: number; clip: number },
+  setLoaded: React.Dispatch<React.SetStateAction<boolean>>,
   prefetchCount: number = 2
 ) => {
   const { step, clip } = cursor;
-  useEffect(() => {
+  const [sd, setSd] = useState<number[]>([]);
+  useLayoutEffect(() => {
     const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
-    cacheContent(
-      storyClips.flat().slice(flatIndex + 1, flatIndex + prefetchCount + 1)
-    );
+    if (step + 1 < storyClips.length) {
+      setLoaded(false);
+
+      cacheContent(storyClips[step + 1]).then((duration: any[]) => {
+        setSd(duration);
+      });
+    }
+    setLoaded(() => {
+      return true;
+    });
 
     // const el = document.getElementById(`clip-${step}.${clip}`);
     // if (el) {
@@ -99,6 +108,19 @@ const usePrefetch = (
     //     }
     //   );
     // }
-  }, [storyClips, document.getElementById(`clip-${step}.${clip}`), cursor]);
+  }, [
+    storyClips,
+    document.getElementById(`clip-${step}.${clip}`),
+    cursor.step,
+  ]);
+
+  return {
+    sd: sd.reduce((sum, d) => sum + d, 0),
+    ...(sd.length > 0 && {
+      forStep: step + 1 < storyClips.length ? step + 1 : step,
+    }),
+    setSd,
+    cd: clip < storyClips[step].length ? sd[clip] : sd[0],
+  };
 };
 export default usePrefetch;

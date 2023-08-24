@@ -1,3 +1,5 @@
+import { Maybe } from "./types";
+
 type NumberOrString = number | string;
 
 export type Story = {
@@ -28,6 +30,7 @@ export interface GlobalCtx {
 }
 
 export interface StoriesContext {
+  stories: Story[][];
   loaded: boolean;
   setLoaded: Function;
   cursor: { step: number; clip: number };
@@ -43,6 +46,9 @@ export interface ProgressContext {
   togglePause: Function;
   previous: Function;
   next: Function;
+  skippedProgress?: number;
+  resetProgress?: Maybe<"all" | "step" | "clip">;
+  onProgressReset?: Function;
 }
 
 export type Action = (action: string) => void;

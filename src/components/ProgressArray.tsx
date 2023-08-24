@@ -1,19 +1,26 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { ProgressContext, StoriesContext } from "../interfaces";
 import ProgressCtx from "../context/Progress";
 import StoriesCtx from "../context/Stories";
 import { timestamp } from "./time";
+import Progress from "./Progress";
 
 type Props = {};
 
 const ProgressArray = (props: Props) => {
   const [stepProgress, setStepProgress] = useState<number>(0);
   const [clipProgress, setClipProgress] = useState<number>(0);
-  const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
   const lastTime = useRef<number>();
   const sd = useRef<number>(0);
   const cd = useRef<number>(0);
-  const p = useRef<boolean>();
+  const p = useRef<boolean>(true);
+  const l = useRef<boolean>(false);
 
   const animationFrameId = useRef<number>(-1);
 
@@ -25,23 +32,38 @@ const ProgressArray = (props: Props) => {
     togglePause,
     previous,
     next,
+    skippedProgress,
+    resetProgress,
+    onProgressReset,
   } = useContext<ProgressContext>(ProgressCtx);
-  const { loaded, setLoaded } = React.useContext<StoriesContext>(StoriesCtx);
+  const { stories, loaded, setLoaded } =
+    React.useContext<StoriesContext>(StoriesCtx);
 
+  l.current = loaded;
   p.current = pause;
   sd.current = stepDuration;
   cd.current = clipDuration;
 
   useEffect(() => {
-    reset();
+    reset("all");
   }, [currentId.step, stepDuration]);
   useEffect(() => {
     reset("clip");
   }, [currentId.clip, clipDuration]);
+  useEffect(() => {
+    if (!resetProgress || !onProgressReset) return;
+    reset(resetProgress);
+    onProgressReset();
+  }, [resetProgress]);
+  useEffect(() => {
+    if (skippedProgress && skippedProgress > 0)
+      setStepProgress(skippedProgress);
+  }, [skippedProgress]);
 
   useEffect(() => {
-    if (loaded) {
-      if (!pause && sd.current && cd.current) {
+    if (!l.current) return;
+    if (l.current) {
+      if (!p.current && sd.current && cd.current) {
         animationFrameId.current = requestAnimationFrame(incrementCount);
         lastTime.current = timestamp();
       }
@@ -49,24 +71,20 @@ const ProgressArray = (props: Props) => {
     return () => {
       cancelAnimationFrame(animationFrameId.current);
     };
-  }, [currentId.step, pause, loaded, sd.current, cd.current]);
+  }, [currentId.step, p.current, l.current, sd.current, cd.current]);
 
-  useEffect(() => {
-    if (!disableKeyEvent) {
-      document.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [disableKeyEvent]);
-
-  const reset = (only?: "step" | "clip") => {
-    if (only) {
-      only === "step" ? setStepProgress(0) : setClipProgress(0);
-    } else {
-      setStepProgress(0);
-      setClipProgress(0);
+  const reset = (mode: "all" | "step" | "clip") => {
+    switch (mode) {
+      case "step":
+        setStepProgress(0);
+        break;
+      case "clip":
+        setClipProgress(0);
+        break;
+      default:
+        setStepProgress(0);
+        setClipProgress(0);
+        break;
     }
   };
 
@@ -74,67 +92,78 @@ const ProgressArray = (props: Props) => {
   let clipProgressCopy = clipProgress;
   const incrementCount = () => {
     // if (countCopy === 0) storyStartCallback();
-    if (!p.current) {
-      if (lastTime.current == undefined) lastTime.current = timestamp();
-      const t = timestamp();
-      const dt = t - lastTime.current;
-      lastTime.current = t;
-      const clipInterval = cd.current;
-      const stepInterval = sd.current;
-
-      //   clip progress
-      setClipProgress((prevCount: number) => {
-        clipProgressCopy = prevCount + (dt * 100) / clipInterval;
-        return clipProgressCopy;
-      });
-
-      if (clipProgressCopy >= 100) {
-        cancelAnimationFrame(animationFrameId.current);
-        lastTime.current = t;
-        next();
-      }
-
-      // step progress
-      setStepProgress((prevCount: number) => {
-        stepProgressCopy = prevCount + (dt * 100) / stepInterval;
-        return stepProgressCopy;
-      });
-      if (stepProgressCopy < 100) {
-        animationFrameId.current = requestAnimationFrame(incrementCount);
-      } else {
-        //   storyEndCallback();
-        cancelAnimationFrame(animationFrameId.current);
-        next();
-      }
-    } else {
+    // if (!p.current) {
+    if (!l.current || p.current) {
       cancelAnimationFrame(animationFrameId.current);
+      return;
     }
+    if (lastTime.current == undefined) lastTime.current = timestamp();
+    const t = timestamp();
+    const dt = t - lastTime.current;
+    lastTime.current = t;
+    const clipInterval = cd.current;
+    const stepInterval = sd.current;
+
+    //   clip progress
+    setClipProgress((prevCount: number) => {
+      clipProgressCopy = prevCount + (dt * 100) / clipInterval;
+      return clipProgressCopy;
+    });
+
+    if (clipProgressCopy >= 100) {
+      cancelAnimationFrame(animationFrameId.current);
+      lastTime.current = t;
+      next();
+    }
+
+    // step progress
+    setStepProgress((prevCount: number) => {
+      stepProgressCopy = prevCount + (dt * 100) / stepInterval;
+      return stepProgressCopy;
+    });
+    if (stepProgressCopy < 100) {
+      animationFrameId.current = requestAnimationFrame(incrementCount);
+    } else {
+      //   storyEndCallback();
+      cancelAnimationFrame(animationFrameId.current);
+      next();
+    }
+    // } else {
+    //   cancelAnimationFrame(animationFrameId.current);
+    // }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.key === "ArrowLeft") {
-      reset();
-      previous();
-    } else if (e.key === "ArrowRight") {
-      cd.current !== sd.current &&
-        setStepProgress((cd.current * 100) / sd.current);
-      next();
-    } else if (e.key === " ") {
-      e.preventDefault();
-      togglePause();
-    }
+  const opacityStyles = {
+    opacity: pause ? 0 : 1,
   };
 
   return (
     <div
       style={{
-        height: 1,
-        width: `${stepProgress}%`,
-        background: "black",
-        marginBottom: 10,
+        display: "flex",
+        justifyContent: "center",
+        maxWidth: "100%",
+        flexWrap: "nowrap" as const,
+        position: "absolute" as const,
+        width: "98%",
+        padding: 5,
+        paddingTop: 7,
+        alignSelf: "center",
+        zIndex: 1001,
+        filter: "drop-shadow(0 1px 8px #222)",
+        transition: "opacity 400ms ease-in-out",
+        // ...opacityStyles,
       }}
-    />
+    >
+      {stories.map((_, i) => (
+        <Progress
+          key={i}
+          width={1 / stories.length}
+          count={stepProgress}
+          active={i === currentId.step ? 1 : i < currentId.step ? 2 : 0}
+        />
+      ))}
+    </div>
   );
 };
 

@@ -6,6 +6,7 @@ import ProgressArray from "./components/ProgressArray";
 import { Story } from "./interfaces";
 import usePrefetch from "./hooks/usePrefetch";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
+import { Maybe } from "./types";
 
 type Props = {};
 
@@ -71,16 +72,26 @@ const App = (props: Props) => {
     step: 0,
     clip: 0,
   });
+  const [skippedProgress, setSkippedProgress] = useState<number>(0);
+  // keyboard handler
+  const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
+  const [resetProgress, setResetProgress] =
+    useState<Maybe<"all" | "step" | "clip">>();
+  const touchId = useRef<any>();
 
   const fsHandle = useFullScreenHandle();
 
   const [loaded, setLoaded] = useState<boolean>(false);
 
-  usePrefetch(storyClips, currentId);
+  const { forStep, sd, cd, setSd } = usePrefetch(
+    storyClips,
+    currentId,
+    setLoaded
+  );
 
-  useLayoutEffect(() => {
-    // setLoaded(false);
-  }, [currentId]);
+  // useEffect(() => {
+  //   console.log("SD: ", sd, cd);
+  // }, [sd, cd]);
 
   useEffect(() => {
     setStories(() => {
@@ -92,13 +103,37 @@ const App = (props: Props) => {
       return temp;
     });
   }, []);
+
+  // useLayoutEffect(() => {
+  //   if (currentId.step === storyClips.length - 1) return;
+  //   setSd([]);
+  // }, [currentId.step]);
+
   useEffect(() => {
-    setStepDuration(0);
-    setClipDuration(0);
+    // setStepDuration(0);
+    // setClipDuration(0);
+    if (forStep && currentId.step === forStep) {
+      setStepDuration(sd * 1000);
+      if (currentId.step === storyClips.length - 1) return;
+      setSd([]);
+      return;
+    }
     getStepDuration(storyClips[currentId.step], currentId.step).then((d) => {
       setStepDuration(d * 1000);
     });
-  }, [currentId.step]);
+    setLoaded(true);
+  }, [currentId.step, sd, forStep]);
+
+  useEffect(() => {
+    if (!disableKeyEvent) {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [disableKeyEvent, stepDuration, clipDuration]);
 
   const action = (action: "pause" | "play") => {
     setPause(() => action === "pause");
@@ -110,7 +145,26 @@ const App = (props: Props) => {
     });
   };
 
-  const next = () => {
+  const previous = (skippedByUser?: boolean) => {
+    if (skippedByUser) {
+      setResetProgress("all");
+    }
+    setCurrentId((prev) => {
+      if (prev.step > 0) {
+        return { step: prev.step - 1, clip: 0 };
+      }
+      return { ...prev, clip: 0 };
+    });
+  };
+
+  const next = (skippedByUser?: boolean) => {
+    if (skippedByUser) {
+      if (clipDuration !== stepDuration) {
+        setSkippedProgress((clipDuration * 100) / stepDuration);
+      } else {
+        setResetProgress("all");
+      }
+    }
     setCurrentId((prev) => {
       if (prev.step < storyClips.length - 1) {
         if (prev.clip < storyClips[prev.step].length - 1) {
@@ -120,46 +174,71 @@ const App = (props: Props) => {
         }
       } else if (prev.clip < storyClips[prev.step].length - 1) {
         return { ...prev, clip: prev.clip + 1 };
-      } else {
-        return { step: 0, clip: 0 };
       }
-      return prev;
+      return { step: 0, clip: 0 };
     });
   };
-  const previous = () => {
-    setCurrentId((prev) => {
-      if (prev.step > 0) {
-        return { step: prev.step - 1, clip: 0 };
+
+  const debouncePause = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    touchId.current = setTimeout(() => {
+      togglePause(true);
+    }, 200);
+  };
+
+  const mouseUp =
+    (type: string) => (e: React.MouseEvent | React.TouchEvent) => {
+      e.preventDefault();
+      touchId.current && clearTimeout(touchId.current);
+      if (pause) {
+        togglePause(false);
+      } else {
+        type === "next" ? next(true) : previous(true);
       }
-      return { ...prev, clip: 0 };
-    });
+    };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === "ArrowLeft") {
+      previous(true);
+    } else if (e.key === "ArrowRight") {
+      next(true);
+    } else if (e.key === " ") {
+      e.preventDefault();
+      togglePause();
+    }
   };
 
   const CurrentVideo = stories?.[currentId.step]?.[currentId.clip];
   return (
-    <div>
+    <div style={{ position: "relative", height: "max-content" }}>
       <StoriesContext.Provider
         value={{
+          stories: storyClips,
           loaded,
           setLoaded,
           cursor: currentId,
         }}
       >
-        {clipDuration && stepDuration ? (
-          <ProgressContext.Provider
-            value={{
-              currentId,
-              stepDuration,
-              clipDuration,
-              pause,
-              togglePause,
-              previous,
-              next,
-            }}
-          >
-            <ProgressArray />
-          </ProgressContext.Provider>
-        ) : null}
+        <ProgressContext.Provider
+          value={{
+            currentId,
+            stepDuration,
+            clipDuration,
+            pause,
+            togglePause,
+            previous,
+            next,
+            skippedProgress: skippedProgress,
+            resetProgress: resetProgress,
+            onProgressReset: () => {
+              setSkippedProgress(0);
+              setResetProgress(null);
+            },
+          }}
+        >
+          {clipDuration && stepDuration ? <ProgressArray /> : null}
+        </ProgressContext.Provider>
         <FullScreen handle={fsHandle}>
           {CurrentVideo && (
             <CurrentVideo
@@ -167,7 +246,7 @@ const App = (props: Props) => {
               getClipDuration={(cd: any) => {
                 setClipDuration(cd * 1000);
                 // clipDuration.current = cd * 1000;
-                setLoaded(true);
+                // setLoaded(true);
               }}
               isPaused={pause}
               action={action}
@@ -178,6 +257,32 @@ const App = (props: Props) => {
           )}
         </FullScreen>
       </StoriesContext.Provider>
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          display: "flex",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        {" "}
+        <div
+          style={{ width: "50%", zIndex: 999 }}
+          onTouchStart={debouncePause}
+          onTouchEnd={mouseUp("previous")}
+          onMouseDown={debouncePause}
+          onMouseUp={mouseUp("previous")}
+        />
+        <div
+          style={{ width: "50%", zIndex: 999 }}
+          onTouchStart={debouncePause}
+          onTouchEnd={mouseUp("next")}
+          onMouseDown={debouncePause}
+          onMouseUp={mouseUp("next")}
+        />
+      </div>
     </div>
   );
 };
