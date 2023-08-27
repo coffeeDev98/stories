@@ -94,6 +94,27 @@ const App = (props: Props) => {
   // }, [sd, cd]);
 
   useEffect(() => {
+    console.log(
+      `loaded => %c${loaded}%c,  pause => %c${pause}%c,  stepDuration => %c${stepDuration}%c,  clipDuration => %c${clipDuration}%c, currentId => %c${currentId.step},${currentId.clip}%c,  forStep => %c${forStep}%c,  sd => %c${sd}%c`,
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white",
+      "color: cornflowerblue",
+      "color: white"
+    );
+    // console.table({ loaded, pause, stepDuration, clipDuration, forStep, sd });
+  }, [loaded, pause, stepDuration, clipDuration, forStep, sd, currentId]);
+
+  useEffect(() => {
     setStories(() => {
       const temp = storyClips.map((step: any, index) => {
         return step.map((clip: any, idx: number) => {
@@ -104,6 +125,10 @@ const App = (props: Props) => {
     });
   }, []);
 
+  useLayoutEffect(() => {
+    setLoaded(false);
+  }, [currentId]);
+
   // useLayoutEffect(() => {
   //   if (currentId.step === storyClips.length - 1) return;
   //   setSd([]);
@@ -112,17 +137,19 @@ const App = (props: Props) => {
   useEffect(() => {
     // setStepDuration(0);
     // setClipDuration(0);
+
     if (forStep && currentId.step === forStep) {
       setStepDuration(sd * 1000);
       if (currentId.step === storyClips.length - 1) return;
       setSd([]);
       return;
     }
+    setSkippedProgress(0);
     getStepDuration(storyClips[currentId.step], currentId.step).then((d) => {
       setStepDuration(d * 1000);
+      setLoaded(true);
     });
-    setLoaded(true);
-  }, [currentId.step, sd, forStep]);
+  }, [currentId.step]);
 
   useEffect(() => {
     if (!disableKeyEvent) {
@@ -160,12 +187,15 @@ const App = (props: Props) => {
   const next = (skippedByUser?: boolean) => {
     if (skippedByUser) {
       if (clipDuration !== stepDuration) {
+        console.log("SETTING_SKIPPED");
+        setResetProgress("clip");
         setSkippedProgress((clipDuration * 100) / stepDuration);
       } else {
         setResetProgress("all");
       }
     }
     setCurrentId((prev) => {
+      console.log("PREV_CURSOR: ", prev);
       if (prev.step < storyClips.length - 1) {
         if (prev.clip < storyClips[prev.step].length - 1) {
           return { ...prev, clip: prev.clip + 1 };
@@ -232,11 +262,11 @@ const App = (props: Props) => {
             skippedProgress: skippedProgress,
             resetProgress: resetProgress,
             onProgressReset: () => {
-              setSkippedProgress(0);
               setResetProgress(null);
             },
           }}
         >
+          {/* <ProgressArray /> */}
           {clipDuration && stepDuration ? <ProgressArray /> : null}
         </ProgressContext.Provider>
         <FullScreen handle={fsHandle}>
@@ -267,7 +297,6 @@ const App = (props: Props) => {
           height: "100%",
         }}
       >
-        {" "}
         <div
           style={{ width: "50%", zIndex: 999 }}
           onTouchStart={debouncePause}

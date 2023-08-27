@@ -37,17 +37,17 @@ const prefetch: (
       if (xhr.status === 200) {
         let URL = window.URL || window.webkitURL;
         let blobUrl = URL.createObjectURL(xhr.response);
-        if (isMobile() || isSafari()) {
-          navigator?.serviceWorker?.ready.then((reg) => {
-            if (reg.active) {
-              reg.active.postMessage({ source: url, blob: xhr.response });
-              onPrefetch(url);
-            }
-          });
-        } else {
-          fetchedCallback(blobUrl, ref);
-          onPrefetch(url);
-        }
+        // if (isMobile() || isSafari()) {
+        navigator?.serviceWorker?.ready.then((reg) => {
+          if (reg.active) {
+            reg.active.postMessage({ source: url, blob: xhr.response });
+            onPrefetch(url);
+          }
+        });
+        // } else {
+        //   fetchedCallback(blobUrl, ref);
+        //   onPrefetch(url);
+        // }
       } else {
         errorCallback();
       }
@@ -84,33 +84,43 @@ const usePrefetch = (
 ) => {
   const { step, clip } = cursor;
   const [sd, setSd] = useState<number[]>([]);
+  const [prefetched, setPrefetched] = useState<string[]>([]);
   useLayoutEffect(() => {
-    const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
-    if (step + 1 < storyClips.length) {
-      setLoaded(false);
+    // const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
+    // if (step + 1 < storyClips.length) {
+    //   setLoaded(false);
 
-      cacheContent(storyClips[step + 1]).then((duration: any[]) => {
-        setSd(duration);
-      });
-    }
-    setLoaded(() => {
-      return true;
-    });
+    //   cacheContent(storyClips[step + 1]).then((duration: any[]) => {
+    //     setSd(duration);
+    //   });
+    // }
+    // setLoaded(() => {
+    //   return true;
+    // });
 
     // const el = document.getElementById(`clip-${step}.${clip}`);
     // if (el) {
-    //   prefetch(
-    //     el as HTMLVideoElement,
-    //     storyClips[step][clip].url,
-    //     () => {
-    //     },
-    //     (url: string) => {
-    //     }
-    //   );
+    if (step + 1 < storyClips.length) {
+      storyClips[step + 1].map((c: Story) => {
+        if (prefetched?.includes(c.url)) {
+          console.log("SKIPPING_PREFETCH");
+          return;
+        }
+        prefetch(
+          null, //el as HTMLVideoElement,
+          c.url,
+          () => {},
+          (url: string) => {
+            setPrefetched((prev) => [...prev, url]);
+            // setLoaded(true);
+          }
+        );
+      });
+    }
     // }
   }, [
     storyClips,
-    document.getElementById(`clip-${step}.${clip}`),
+    // document.getElementById(`clip-${step}.${clip}`),
     cursor.step,
   ]);
 

@@ -56,8 +56,9 @@ const ProgressArray = (props: Props) => {
     onProgressReset();
   }, [resetProgress]);
   useEffect(() => {
-    if (skippedProgress && skippedProgress > 0)
+    if (typeof skippedProgress === "number") {
       setStepProgress(skippedProgress);
+    }
   }, [skippedProgress]);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ const ProgressArray = (props: Props) => {
   }, [currentId.step, p.current, l.current, sd.current, cd.current]);
 
   const reset = (mode: "all" | "step" | "clip") => {
+    console.log("RESETTING FOR ", currentId);
     switch (mode) {
       case "step":
         setStepProgress(0);
@@ -111,9 +113,18 @@ const ProgressArray = (props: Props) => {
     });
 
     if (clipProgressCopy >= 100) {
+      console.log(
+        "CALLING_NEXT_CLIP: ",
+        currentId,
+        clipInterval,
+        stepInterval,
+        clipProgressCopy,
+        stepProgressCopy
+      );
       cancelAnimationFrame(animationFrameId.current);
       lastTime.current = t;
       next();
+      return;
     }
 
     // step progress
@@ -125,7 +136,16 @@ const ProgressArray = (props: Props) => {
       animationFrameId.current = requestAnimationFrame(incrementCount);
     } else {
       //   storyEndCallback();
+      console.log(
+        "CALLING_NEXT_STEP: ",
+        currentId,
+        clipInterval,
+        stepInterval,
+        clipProgressCopy,
+        stepProgressCopy
+      );
       cancelAnimationFrame(animationFrameId.current);
+      // reset("all");
       next();
     }
     // } else {

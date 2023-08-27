@@ -31,7 +31,10 @@ const Video =
           vid.current.pause();
         } else {
           vid.current.play().catch((err) => {
-            console.log("playback error => ", err);
+            console.log(
+              `playback error ${cursor.step}.${cursor.clip} => `,
+              err
+            );
           });
         }
       }
@@ -53,20 +56,27 @@ const Video =
     const videoLoaded = () => {
       // setLoaded(true);
       // getClipDuration(vid.current?.duration);
-      if (!isPaused) {
-        vid?.current
-          ?.play()
-          .then(() => {
-            action("play");
-          })
-          .catch(() => {
-            setMuted(true);
-            vid.current?.play().finally(() => {
-              setMuted(false);
+      // console.log("VID: ", vid.current);
+      vid?.current
+        ?.play()
+        .then(() => {
+          action("play");
+        })
+        .catch(() => {
+          setMuted(true);
+          vid.current
+            ?.play()
+            .catch((err) => {
+              console.log(
+                `retry play err ${cursor.step}.${cursor.clip} => `,
+                err
+              );
+            })
+            .finally(() => {
+              // setMuted(false);
               action("play");
             });
-          });
-      }
+        });
     };
 
     return (
@@ -79,6 +89,7 @@ const Video =
           webkit-playsinline="true"
           preload="auto"
           muted={muted}
+          // muted={true}
           onWaiting={onWaiting}
           onPlaying={onPlaying}
           onLoadedMetadata={() => {
