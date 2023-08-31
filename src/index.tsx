@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
+import AppV2 from "./v2/App";
 import App from "./App";
 
 if ("serviceWorker" in navigator) {
@@ -16,5 +17,5 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-createRoot(document.getElementById("root") as HTMLElement).render(<App />);
+createRoot(document.getElementById("root") as HTMLElement).render(<AppV2 />);
 // ReactDOM.render(<App />, document.getElementById("root"));
