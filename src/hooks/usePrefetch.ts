@@ -63,7 +63,7 @@ const cacheContent = async (contents: Story[]) => {
     return new Promise((resolve, reject) => {
       if (!content.url) return;
 
-      if (content.type === "video") {
+      if (content.__typename.toLowerCase() === "video") {
         const video = document.createElement("video");
         video.src = content.url;
         video.onloadeddata = () => resolve(video.duration);

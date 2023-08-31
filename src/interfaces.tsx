@@ -3,8 +3,11 @@ import { Maybe } from "./types";
 type NumberOrString = number | string;
 
 export type Story = {
+  id: string;
   url: string;
-  type: string;
+  thumbnailUrl: string;
+  duration: number;
+  __typename: string;
 };
 
 export interface GlobalCtx {
