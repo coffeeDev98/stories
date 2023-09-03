@@ -108,6 +108,7 @@ const App = (props: Props) => {
       {progressArray.map((p, i) => (
         <div key={i}>{p}</div>
       ))}
+
       <Content {...contentProps} />
     </>
   );
