@@ -197,6 +197,8 @@ const useContainer: (props: GlobalProps) => {
       muted,
       setMuted,
       stepProgress,
+      debouncePause,
+      mouseUp,
     },
     progressArray: inputStories.map((_, i) =>
       i === cursor.step ? stepProgress : i < cursor.step ? 100 : 0
@@ -217,6 +219,8 @@ export const Content: FC<any> = ({
   muted,
   setMuted,
   stepProgress,
+  debouncePause,
+  mouseUp,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
@@ -235,6 +239,31 @@ export const Content: FC<any> = ({
       >
         {VideoRenderer && <VideoRenderer />}
       </StoriesContext.Provider>
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          display: "flex",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <div
+          style={{ width: "50%", zIndex: 999 }}
+          onTouchStart={debouncePause}
+          onTouchEnd={mouseUp("previous")}
+          onMouseDown={debouncePause}
+          onMouseUp={mouseUp("previous")}
+        />
+        <div
+          style={{ width: "50%", zIndex: 999 }}
+          onTouchStart={debouncePause}
+          onTouchEnd={mouseUp("next")}
+          onMouseDown={debouncePause}
+          onMouseUp={mouseUp("next")}
+        />
+      </div>
     </div>
   );
 };

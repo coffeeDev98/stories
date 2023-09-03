@@ -102,6 +102,9 @@ const App = (props: Props) => {
     stories: testData,
     loop: true,
     // isPaused: true,
+    styles: {
+      container: { position: "relative" },
+    },
   });
   return (
     <>
