@@ -6,6 +6,7 @@ export interface GlobalProps {
   loader?: JSX.Element;
   loop?: boolean;
   isPaused?: boolean;
+  isMuted?: boolean;
   onAllStoriesEnd?: Function;
   onStoryStart?: Function;
   onStoryEnd?: Function;
@@ -18,4 +19,15 @@ export interface GlobalProps {
     container?: CSSProperties;
     video?: CSSProperties;
   };
+}
+
+export interface StoriesContext {
+  stories: Story[][];
+  loaded: boolean;
+  setLoaded: Function;
+  cursor: { step: number; clip: number };
+  action: Function;
+  pause: boolean;
+  muted: boolean;
+  setMuted: Function;
 }

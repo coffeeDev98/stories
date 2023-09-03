@@ -1,5 +1,5 @@
 import React from "react";
-import Container from "./components/Container";
+import useContainer from "./hooks/useContainer";
 
 type Props = {};
 
@@ -97,9 +97,20 @@ const testData = [
     },
   ],
 ];
-
 const App = (props: Props) => {
-  return <Container stories={testData} loop={false} />;
+  const { Content, contentProps, progressArray } = useContainer({
+    stories: testData,
+    loop: true,
+    // isPaused: true,
+  });
+  return (
+    <>
+      {progressArray.map((p, i) => (
+        <div key={i}>{p}</div>
+      ))}
+      <Content {...contentProps} />
+    </>
+  );
 };
 
 export default App;

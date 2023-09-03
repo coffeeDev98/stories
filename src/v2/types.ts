@@ -4,7 +4,7 @@ export type Story = {
   url: string;
   id?: string;
   thumbnailUrl?: string;
-  duration?: number;
+  duration: number;
   __typename?: string;
 };
 

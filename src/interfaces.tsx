@@ -37,6 +37,10 @@ export interface StoriesContext {
   loaded: boolean;
   setLoaded: Function;
   cursor: { step: number; clip: number };
+  action?: Function;
+  pause?: boolean;
+  muted?: boolean;
+  setMuted?: Function;
 }
 
 export interface ProgressContext {
