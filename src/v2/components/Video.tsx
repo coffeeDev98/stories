@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
+import { detectBrowser } from "../utils";
 
 type Props = {};
 
@@ -39,43 +40,36 @@ const Video = (metadata: any) => (props: Props) => {
   }, [loaded]);
 
   const onWaiting = () => {
-    setLoaded(false);
     action("pause");
   };
 
   const onPlaying = () => {
     setLoaded(true);
     action("play");
-    muted && !isMuted && setMuted(false);
+    if (detectBrowser() !== "safari") {
+      muted && !isMuted && setMuted(false);
+    }
   };
 
   const videoLoaded = () => {
-    // getClipDuration(vid.current?.duration);
-    // console.log("VID: ", vid.current);
     ref?.current
       ?.play()
       .then(() => {
         action("play");
       })
       .catch(() => {
-        setLoaded(false);
         setMuted(true);
         ref.current
           ?.play()
-          // .then(() => {
-          //   action("play");
-          // })
+          .then(() => {
+            action("play");
+          })
           .catch((err) => {
-            action("pause");
             console.log(
               `retry play err ${cursor.step}.${cursor.clip} => `,
               err
             );
           });
-        // .finally(() => {
-        //   // setMuted(false);
-        //   action("play");
-        // });
       });
   };
 
