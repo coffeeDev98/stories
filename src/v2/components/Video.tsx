@@ -2,20 +2,20 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
-import { detectBrowser } from "../utils";
+import { detectBrowser, detectOS } from "../utils";
 
 type Props = {};
 
 const Video = (metadata: any) => (props: Props) => {
-  const [muted, setMuted] = useState<boolean>(false);
+  const [muted, setMuted] = useState<boolean>(true);
   const ref = useRef<HTMLVideoElement | null>(null);
 
   const { action, stories, cursor, loaded, setLoaded, pause, isMuted } =
     useContext<StoriesContext>(StoriesCtx);
 
-  useEffect(() => {
-    if (typeof isMuted === "boolean") setMuted(isMuted);
-  }, [isMuted]);
+  // useEffect(() => {
+  //   if (typeof isMuted === "boolean") setMuted(isMuted);
+  // }, [isMuted]);
 
   useEffect(() => {
     if (ref.current) {
@@ -46,7 +46,7 @@ const Video = (metadata: any) => (props: Props) => {
   const onPlaying = () => {
     setLoaded(true);
     action("play");
-    if (detectBrowser() !== "safari") {
+    if (detectOS() !== "mac-os") {
       muted && !isMuted && setMuted(false);
     }
   };

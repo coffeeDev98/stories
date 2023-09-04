@@ -29,3 +29,15 @@ export const detectBrowser = () => {
 
   return browser;
 };
+
+export const detectOS = () => {
+  if (window.navigator.userAgent.indexOf("Windows") != -1) {
+    return "windows";
+  } else if (window.navigator.userAgent.indexOf("Mac OS") != -1) {
+    return "mac-os";
+  } else if (window.navigator.userAgent.indexOf("Linux") != -1) {
+    return "linux";
+  } else {
+    return undefined;
+  }
+};
