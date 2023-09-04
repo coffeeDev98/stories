@@ -8,6 +8,5 @@ export default React.createContext<StoriesContext>({
   cursor: { step: 0, clip: 0 },
   action: () => {},
   pause: false,
-  muted: false,
-  setMuted: () => {},
+  isMuted: false,
 });

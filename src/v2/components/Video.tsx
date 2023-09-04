@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
@@ -6,10 +6,15 @@ import { RippleLoader } from "./RippleLoader";
 type Props = {};
 
 const Video = (metadata: any) => (props: Props) => {
+  const [muted, setMuted] = useState<boolean>(false);
   const ref = useRef<HTMLVideoElement | null>(null);
 
-  const { action, stories, cursor, loaded, setLoaded, pause, muted, setMuted } =
+  const { action, stories, cursor, loaded, setLoaded, pause, isMuted } =
     useContext<StoriesContext>(StoriesCtx);
+
+  useEffect(() => {
+    if (typeof isMuted === "boolean") setMuted(isMuted);
+  }, [isMuted]);
 
   useEffect(() => {
     if (ref.current) {
@@ -41,6 +46,7 @@ const Video = (metadata: any) => (props: Props) => {
   const onPlaying = () => {
     setLoaded(true);
     action("play");
+    muted && !isMuted && setMuted(false);
   };
 
   const videoLoaded = () => {
@@ -56,15 +62,15 @@ const Video = (metadata: any) => (props: Props) => {
         setMuted(true);
         ref.current
           ?.play()
-          .then(() => {
-            action("play");
-          })
+          // .then(() => {
+          //   action("play");
+          // })
           .catch((err) => {
+            action("pause");
             console.log(
               `retry play err ${cursor.step}.${cursor.clip} => `,
               err
             );
-            action("pause");
           });
         // .finally(() => {
         //   // setMuted(false);

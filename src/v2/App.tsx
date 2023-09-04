@@ -1,36 +1,65 @@
 import React from "react";
 import useContainer from "./hooks/useContainer";
+import { Story } from "../interfaces";
 
 type Props = {};
-
 const testData2 = [
   [
     {
-      url: "https://static.pixical.com/videos/cooking/Alla%20Gricia/Alla%20Gricia%20-%20Cook%20Pasta%20-%20Landscape1.mp4",
-      type: "video",
+      id: "3591",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Landscape1.jpg",
+      duration: 22.122104,
+      __typename: "Video",
     },
     {
-      url: "https://static.pixical.com/videos/cooking/Alla%20Gricia/Alla%20Gricia%20-%20Cook%20Pasta%20-%20Landscape7.mp4",
-      type: "video",
+      id: "3593",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Landscape1.jpg",
+      duration: 27.027,
+      __typename: "Video",
     },
   ],
   [
     {
-      url: "https://static.pixical.com/videos/cooking/Alla%20Gricia/Alla%20Gricia%20-%20Cook%20Pasta%20-%20Landscape2.mp4",
-      type: "video",
+      id: "3595",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Typical%20Ratios%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Typical%20Ratios%20-%20Landscape1.jpg",
+      duration: 32.5325,
+      __typename: "Video",
     },
   ],
   [
     {
-      url: "https://static.pixical.com/videos/cooking/Alla%20Gricia/Alla%20Gricia%20-%20Cook%20Pasta%20-%20Landscape3.mp4",
-      type: "video",
+      id: "3597",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Standard+Steps+-+Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Standard%20Steps%20-%20Landscape1.jpg",
+      duration: 68.635233,
+      __typename: "Video",
     },
     {
-      url: "https://static.pixical.com/videos/cooking/Alla+Gricia/Alla+Gricia+-+Cook+Pasta+-+Landscape6.mp4",
-      type: "video",
+      id: "3599",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Visual+Cues+-+Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Visual%20Cues%20-%20Landscape1.jpg",
+      duration: 53.486771,
+      __typename: "Video",
+    },
+    {
+      id: "3601",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Landscape1.jpg",
+      duration: 13.880542,
+      __typename: "Video",
     },
   ],
 ];
+
 const testData = [
   [
     {
@@ -99,7 +128,7 @@ const testData = [
 ];
 const App = (props: Props) => {
   const { Content, contentProps, progressArray } = useContainer({
-    stories: testData,
+    stories: testData2,
     loop: true,
     // isPaused: true,
     styles: {

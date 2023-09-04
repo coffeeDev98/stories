@@ -14,8 +14,8 @@ const useContainer: (props: GlobalProps) => {
   stories: inputStories,
   loader,
   loop,
-  isPaused,
-  isMuted,
+  isPaused = false,
+  isMuted = false,
   onAllStoriesEnd,
   onStoryStart,
   onStoryEnd,
@@ -31,7 +31,6 @@ const useContainer: (props: GlobalProps) => {
   const [clipDuration, setClipDuration] = useState<number>(0);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [pause, setPause] = useState<boolean>(false);
-  const [muted, setMuted] = useState<boolean>(false);
   const [bufferAction, setBufferAction] = useState<boolean>(true);
   const [skippedProgress, setSkippedProgress] = useState<number>(0);
   const [resetProgress, setResetProgress] =
@@ -51,10 +50,6 @@ const useContainer: (props: GlobalProps) => {
   useEffect(() => {
     if (typeof isPaused === "boolean") setPause(isPaused);
   }, [isPaused]);
-
-  useEffect(() => {
-    if (typeof isMuted === "boolean") setPause(isMuted);
-  }, [isMuted]);
 
   useEffect(() => {
     if (inputStories.length > 0) {
@@ -91,6 +86,7 @@ const useContainer: (props: GlobalProps) => {
   }, [disableKeyEvent, stepDuration, clipDuration, pause]);
 
   const toggleState = (action: string, bufferAction?: boolean) => {
+    console.log("TOGGLE_STATE: ", action); //TODO: remove log
     setPause(action === "pause");
     setBufferAction(!!bufferAction);
   };
@@ -194,8 +190,7 @@ const useContainer: (props: GlobalProps) => {
       clipDuration,
       styles,
       pause,
-      muted,
-      setMuted,
+      isMuted,
       stepProgress,
       debouncePause,
       mouseUp,
@@ -216,8 +211,7 @@ export const Content: FC<any> = ({
   clipDuration,
   styles,
   pause,
-  muted,
-  setMuted,
+  isMuted,
   stepProgress,
   debouncePause,
   mouseUp,
@@ -233,8 +227,7 @@ export const Content: FC<any> = ({
           cursor,
           action: toggleState,
           pause,
-          muted,
-          setMuted,
+          isMuted,
         }}
       >
         {VideoRenderer && <VideoRenderer />}

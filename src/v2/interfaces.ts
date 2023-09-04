@@ -28,6 +28,5 @@ export interface StoriesContext {
   cursor: { step: number; clip: number };
   action: Function;
   pause: boolean;
-  muted: boolean;
-  setMuted: Function;
+  isMuted: boolean;
 }
