@@ -45,9 +45,14 @@ const Video = (metadata: any) => (props: Props) => {
 
   const onPlaying = () => {
     setLoaded(true);
-    action("play");
-    if (detectOS() !== "mac-os") {
+    if (
+      navigator.userActivation.hasBeenActive ||
+      !["mac-os", "linux"].includes(
+        detectOS() as "linux" | "mac-os" | "windows"
+      )
+    ) {
       muted && !isMuted && setMuted(false);
+      action("play");
     }
   };
 
