@@ -3,7 +3,7 @@ import useContainer from "./hooks/useContainer";
 import { Story } from "../interfaces";
 
 type Props = {};
-const testData2 = [
+const landscapeVideos = [
   [
     {
       id: "3591",
@@ -55,6 +55,47 @@ const testData2 = [
       thumbnailUrl:
         "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Landscape1.jpg",
       duration: 13.880542,
+      __typename: "Video",
+    },
+  ],
+];
+
+const portraitVideos = [
+  [
+    {
+      id: "3592",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Portrait1.jpg",
+      duration: 22.222208,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3594",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Portrait1.jpg",
+      duration: 27.027,
+      __typename: "Video",
+    },
+    {
+      id: "3600",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Visual+Cues+-+Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Visual%20Cues%20-%20Portrait1.jpg",
+      duration: 53.486771,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3602",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Portrait1.jpg",
+      duration: 13.9139,
       __typename: "Video",
     },
   ],
@@ -128,7 +169,7 @@ const testData = [
 ];
 const App = (props: Props) => {
   const { Content, contentProps, progressArray } = useContainer({
-    stories: testData2,
+    stories: window.innerWidth < 768 ? portraitVideos : landscapeVideos,
     loop: true,
     // isPaused: true,
     styles: {
