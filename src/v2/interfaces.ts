@@ -14,6 +14,8 @@ export interface GlobalProps {
   onStoryEnd?: Function;
   onPrevious?: Function;
   onNext?: Function;
+  onPause?: Function;
+  onPlay?: Function;
   keyboardNavigation?: boolean;
   touchNavigation?: boolean;
   styles?: {

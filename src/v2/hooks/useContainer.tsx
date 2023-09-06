@@ -33,6 +33,8 @@ const useContainer: (props: GlobalProps) => {
   onStoryEnd,
   onPrevious,
   onNext,
+  onPause,
+  onPlay,
   keyboardNavigation,
   touchNavigation,
   styles,
@@ -65,7 +67,7 @@ const useContainer: (props: GlobalProps) => {
   );
   // configure to input props
   useEffect(() => {
-    if (typeof isPaused === "boolean") setPause(isPaused);
+    if (typeof isPaused === "boolean") toggleState(isPaused ? "pause" : "play");
   }, [isPaused]);
   useEffect(() => {
     if (inputStories.length > 0) {
@@ -127,6 +129,7 @@ const useContainer: (props: GlobalProps) => {
   const toggleState = (action: string, bufferAction?: boolean) => {
     setPause(action === "pause");
     setBufferAction(!!bufferAction);
+    action === "pause" ? onPause?.() : onPlay?.();
   };
 
   const previous = (skippedByUser?: boolean) => {
