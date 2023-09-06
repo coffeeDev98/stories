@@ -1,7 +1,8 @@
 import { CSSProperties } from "react";
-import { Story } from "./types";
+import { Cursor, Story } from "./types";
 
 export interface GlobalProps {
+  cursor?: Cursor;
   stories: Story[][];
   loader?: JSX.Element;
   loop?: boolean;

@@ -21,6 +21,7 @@ const useContainer: (props: GlobalProps) => {
   contentProps: any;
   progressArray: any[];
 } = ({
+  cursor: inputCursor,
   stories: inputStories,
   loader,
   loop,
@@ -37,7 +38,11 @@ const useContainer: (props: GlobalProps) => {
   styles,
 }) => {
   const [stories, setStories] = useState<any[][]>([]);
-  const [cursor, setCursor] = useState<Cursor>({ step: 0, clip: 0 });
+  const [cursor, setCursor] = useState<Cursor>(
+    inputCursor && inputStories[inputCursor?.step].length > 0
+      ? { step: inputCursor.step, clip: 0 }
+      : { step: 0, clip: 0 }
+  );
   const [clipDuration, setClipDuration] = useState<number>(0);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [pause, setPause] = useState<boolean>(false);

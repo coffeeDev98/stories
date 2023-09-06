@@ -175,6 +175,7 @@ const App = (props: Props) => {
     loop: true,
     // isPaused: true,
     // isFullscreen: true,
+    // cursor: { step: 1, clip: 0 },
     styles: {},
   });
   return (
