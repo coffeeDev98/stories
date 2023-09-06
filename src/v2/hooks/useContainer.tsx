@@ -14,6 +14,7 @@ import StoriesContext from "../context/Stories";
 import Video from "../components/Video";
 import useProgress from "./useProgress";
 import { styled } from "styled-components";
+import fscreen from "../components/fscreen";
 
 const useContainer: (props: GlobalProps) => {
   Content: any;
@@ -61,6 +62,7 @@ const useContainer: (props: GlobalProps) => {
     if (typeof isPaused === "boolean") setPause(isPaused);
   }, [isPaused]);
   useEffect(() => {
+    console.log("fullscreen => ", fullscreen); //TODO: remove log
     if (isFullscreen && !fullscreen) fullscreenHandler();
     // setFullscreen(isFullscreen);
   }, [isFullscreen, fullscreen]);
@@ -99,29 +101,16 @@ const useContainer: (props: GlobalProps) => {
   }, [disableKeyEvent, stepDuration, clipDuration, pause]);
 
   const fullscreenHandler = () => {
-    if (document.fullscreenElement === null) {
-      document
-        .getElementById("stories-container")
-        ?.requestFullscreen()
-        .then(() => {
-          console.log("entered_fullscreen");
-          setFullscreen(true);
-        })
-        .catch((err) => {
-          console.log("request fullscreen error => ", err);
-        });
+    const storyContainer = document.getElementById("stories-container");
+    if (document.fullscreenElement === null && storyContainer) {
+      fscreen.requestFullscreen(storyContainer);
+      setFullscreen(true);
+
       // handle.enter();
     } else {
       // handle.exit();
-      document
-        ?.exitFullscreen()
-        .then(() => {
-          console.log("exited_fullscreen");
-          setFullscreen(false);
-        })
-        .catch((err) => {
-          console.log("exit fullscreen error => ", err);
-        });
+      fscreen.exitFullscreen(document);
+      setFullscreen(false);
     }
   };
 
@@ -265,7 +254,10 @@ export const Content: FC<any> = ({
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
     // <FullScreen handle={handle}>
-    <div id="stories-container" style={{ ...styles?.container }}>
+    <div
+      id="stories-container"
+      style={{ ...defaultContainerStyles, ...styles?.container }}
+    >
       <StoriesContext.Provider
         value={{
           stories: inputStories,
@@ -302,6 +294,11 @@ export const Content: FC<any> = ({
     </div>
     // </FullScreen>
   );
+};
+
+const defaultContainerStyles: CSSProperties = {
+  position: "relative",
+  width: "100%",
 };
 
 const touchControlContainerStyles: CSSProperties = {

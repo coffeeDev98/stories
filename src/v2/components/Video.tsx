@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
-import { detectBrowser, detectOS } from "../utils";
+import { detectBrowser, detectOS, isMobile } from "../utils";
 import { styled } from "styled-components";
 
 type Props = {};
@@ -100,23 +100,26 @@ const Video = (metadata: any) => (props: Props) => {
     <div
       style={{
         position: "relative",
-        ...(fullscreen && { width: "100%", height: "100%" }),
+        ...(fullscreen && {
+          width: "100%",
+          height: "100%",
+          ...(isMobile() && { position: "static", top: 0, left: 0 }),
+        }),
       }}
     >
       <video
         style={{
           width: "100%",
+          height: "100%",
           ...(fullscreen
             ? {
                 position: "static",
-                height: "100%",
                 zIndex: 99,
                 top: 0,
                 left: 0,
               }
             : {
-                aspectRatio:
-                  window.innerWidth < 768 ? "calc(9/16)" : "calc(16/9)",
+                aspectRatio: isMobile() ? "calc(9/16)" : "calc(16/9)",
               }),
         }}
         id={`clip-${metadata?.step}.${metadata?.clip}`}

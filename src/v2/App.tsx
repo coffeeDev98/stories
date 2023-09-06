@@ -2,6 +2,7 @@ import React from "react";
 import useContainer from "./hooks/useContainer";
 import { Story } from "../interfaces";
 import Progress from "./components/Progress/Progress";
+import { isMobile } from "./utils";
 
 type Props = {};
 const landscapeVideos = [
@@ -170,13 +171,11 @@ const testData = [
 ];
 const App = (props: Props) => {
   const { Content, contentProps, progressArray } = useContainer({
-    stories: window.innerWidth < 768 ? portraitVideos : landscapeVideos,
+    stories: isMobile() ? portraitVideos : landscapeVideos,
     loop: true,
     // isPaused: true,
     // isFullscreen: true,
-    styles: {
-      container: { position: "relative" },
-    },
+    styles: {},
   });
   return (
     <div style={{ position: "relative" }}>
