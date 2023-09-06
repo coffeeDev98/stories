@@ -1,6 +1,7 @@
 import React from "react";
 import useContainer from "./hooks/useContainer";
 import { Story } from "../interfaces";
+import Progress from "./components/Progress/Progress";
 
 type Props = {};
 const landscapeVideos = [
@@ -172,18 +173,29 @@ const App = (props: Props) => {
     stories: window.innerWidth < 768 ? portraitVideos : landscapeVideos,
     loop: true,
     // isPaused: true,
+    // isFullscreen: true,
     styles: {
       container: { position: "relative" },
     },
   });
   return (
-    <>
-      {progressArray.map((p, i) => (
-        <div key={i}>{p}</div>
-      ))}
+    <div style={{ position: "relative" }}>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          position: "absolute",
+          top: 2,
+          zIndex: 2,
+        }}
+      >
+        {progressArray.map((p, i) => (
+          <Progress key={i} width={1 / progressArray.length} count={p} />
+        ))}
+      </div>
 
       <Content {...contentProps} />
-    </>
+    </div>
   );
 };
 

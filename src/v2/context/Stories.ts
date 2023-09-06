@@ -9,4 +9,8 @@ export default React.createContext<StoriesContext>({
   action: () => {},
   pause: false,
   isMuted: false,
+  fullscreen: false,
+  next: () => {},
+  previous: () => {},
+  fullscreenHandler: () => {},
 });

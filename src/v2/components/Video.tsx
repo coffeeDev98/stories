@@ -3,6 +3,7 @@ import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
 import { detectBrowser, detectOS } from "../utils";
+import { styled } from "styled-components";
 
 type Props = {};
 
@@ -10,8 +11,19 @@ const Video = (metadata: any) => (props: Props) => {
   const [muted, setMuted] = useState<boolean>(true);
   const ref = useRef<HTMLVideoElement | null>(null);
 
-  const { action, stories, cursor, loaded, setLoaded, pause, isMuted } =
-    useContext<StoriesContext>(StoriesCtx);
+  const {
+    action,
+    stories,
+    cursor,
+    loaded,
+    setLoaded,
+    pause,
+    isMuted,
+    fullscreen,
+    next,
+    previous,
+    fullscreenHandler,
+  } = useContext<StoriesContext>(StoriesCtx);
 
   // useEffect(() => {
   //   if (typeof isMuted === "boolean") setMuted(isMuted);
@@ -39,12 +51,18 @@ const Video = (metadata: any) => (props: Props) => {
     loaded && videoLoaded();
   }, [loaded]);
 
+  const toggleMute = (force?: boolean) => {
+    setMuted((prev) => (typeof force === "boolean" ? force : !prev));
+  };
+
   const onWaiting = () => {
     action("pause");
   };
 
   const onPlaying = () => {
     setLoaded(true);
+
+    // check to avoid NotAllowedError on mac-os(ios) & linux(android)
     if (
       navigator.userActivation.hasBeenActive ||
       !["mac-os", "linux"].includes(
@@ -79,9 +97,28 @@ const Video = (metadata: any) => (props: Props) => {
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div
+      style={{
+        position: "relative",
+        ...(fullscreen && { width: "100%", height: "100%" }),
+      }}
+    >
       <video
-        style={{ width: "100%", aspectRatio: "calc(16/9)" }}
+        style={{
+          width: "100%",
+          ...(fullscreen
+            ? {
+                position: "static",
+                height: "100%",
+                zIndex: 99,
+                top: 0,
+                left: 0,
+              }
+            : {
+                aspectRatio:
+                  window.innerWidth < 768 ? "calc(9/16)" : "calc(16/9)",
+              }),
+        }}
         id={`clip-${metadata?.step}.${metadata?.clip}`}
         ref={ref}
         src={stories[cursor.step][cursor.clip].url}
@@ -99,6 +136,24 @@ const Video = (metadata: any) => (props: Props) => {
         playsInline
         autoPlay
       />
+
+      <MediaControl>
+        <div id="prev" onClick={() => previous(true)}>
+          prev
+        </div>
+        <div id="play" onClick={() => action(pause ? "play" : "pause")}>
+          play
+        </div>
+        <div id="next" onClick={() => next(true)}>
+          next
+        </div>
+        <div id="volume" onClick={() => toggleMute()}>
+          volume
+        </div>
+        <div id="fullscreen" onClick={() => fullscreenHandler()}>
+          fullscreen
+        </div>
+      </MediaControl>
       {!loaded && (
         <div
           style={{
@@ -122,4 +177,19 @@ const Video = (metadata: any) => (props: Props) => {
   );
 };
 
+const MediaControl = styled.div`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  /* width: 100%; */
+  z-index: 9999;
+  color: white;
+  // padding: 10;
+  background: black;
+  div {
+    margin: 0 10px;
+  }
+`;
 export default Video;

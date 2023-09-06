@@ -40,7 +40,6 @@ const useProgress: (props: any) => { stepProgress: any } = ({
   }, [skippedProgress]);
 
   useEffect(() => {
-    console.log("LOADED => ", loaded, pause); //TODO: remove log
     if (!loaded) return;
     if (loaded) {
       if (!pause && stepDuration && clipDuration) {
@@ -54,7 +53,6 @@ const useProgress: (props: any) => { stepProgress: any } = ({
   }, [cursor.step, pause, loaded, stepDuration, clipDuration]);
 
   const reset = (mode: "all" | "step" | "clip") => {
-    console.log("RESETTING FOR ", mode, cursor); //TODO: remove log
     switch (mode) {
       case "step":
         setStepProgress(0);

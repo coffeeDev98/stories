@@ -7,6 +7,7 @@ export interface GlobalProps {
   loop?: boolean;
   isPaused?: boolean;
   isMuted?: boolean;
+  isFullscreen?: boolean;
   onAllStoriesEnd?: Function;
   onStoryStart?: Function;
   onStoryEnd?: Function;
@@ -14,7 +15,6 @@ export interface GlobalProps {
   onNext?: Function;
   keyboardNavigation?: boolean;
   touchNavigation?: boolean;
-  preloadCount?: number;
   styles?: {
     container?: CSSProperties;
     video?: CSSProperties;
@@ -29,4 +29,8 @@ export interface StoriesContext {
   action: Function;
   pause: boolean;
   isMuted: boolean;
+  fullscreen: boolean;
+  next: Function;
+  previous: Function;
+  fullscreenHandler: Function;
 }

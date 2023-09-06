@@ -1,10 +1,19 @@
-import React, { FC, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  CSSProperties,
+  FC,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { GlobalProps } from "../interfaces";
 import { Cursor, Maybe, Story } from "../types";
 import usePrefetch from "./usePrefetch";
 import StoriesContext from "../context/Stories";
 import Video from "../components/Video";
 import useProgress from "./useProgress";
+import { styled } from "styled-components";
 
 const useContainer: (props: GlobalProps) => {
   Content: any;
@@ -16,6 +25,7 @@ const useContainer: (props: GlobalProps) => {
   loop,
   isPaused = false,
   isMuted = false,
+  isFullscreen = false,
   onAllStoriesEnd,
   onStoryStart,
   onStoryEnd,
@@ -23,7 +33,6 @@ const useContainer: (props: GlobalProps) => {
   onNext,
   keyboardNavigation,
   touchNavigation,
-  preloadCount,
   styles,
 }) => {
   const [stories, setStories] = useState<any[][]>([]);
@@ -31,6 +40,7 @@ const useContainer: (props: GlobalProps) => {
   const [clipDuration, setClipDuration] = useState<number>(0);
   const [stepDuration, setStepDuration] = useState<number>(0);
   const [pause, setPause] = useState<boolean>(false);
+  const [fullscreen, setFullscreen] = useState<boolean>(false);
   const [bufferAction, setBufferAction] = useState<boolean>(true);
   const [skippedProgress, setSkippedProgress] = useState<number>(0);
   const [resetProgress, setResetProgress] =
@@ -50,6 +60,10 @@ const useContainer: (props: GlobalProps) => {
   useEffect(() => {
     if (typeof isPaused === "boolean") setPause(isPaused);
   }, [isPaused]);
+  useEffect(() => {
+    if (isFullscreen && !fullscreen) fullscreenHandler();
+    // setFullscreen(isFullscreen);
+  }, [isFullscreen, fullscreen]);
 
   useEffect(() => {
     if (inputStories.length > 0) {
@@ -65,7 +79,6 @@ const useContainer: (props: GlobalProps) => {
 
   useEffect(() => {
     if (cd.length > 0 && sd.length > 0) {
-      // console.log({ cursor, cd, sd });
       setStepDuration(sd[cursor.step]);
       setClipDuration(cd[cursor.step]?.[cursor.clip]);
     }
@@ -85,8 +98,34 @@ const useContainer: (props: GlobalProps) => {
     };
   }, [disableKeyEvent, stepDuration, clipDuration, pause]);
 
+  const fullscreenHandler = () => {
+    if (document.fullscreenElement === null) {
+      document
+        .getElementById("stories-container")
+        ?.requestFullscreen()
+        .then(() => {
+          console.log("entered_fullscreen");
+          setFullscreen(true);
+        })
+        .catch((err) => {
+          console.log("request fullscreen error => ", err);
+        });
+      // handle.enter();
+    } else {
+      // handle.exit();
+      document
+        ?.exitFullscreen()
+        .then(() => {
+          console.log("exited_fullscreen");
+          setFullscreen(false);
+        })
+        .catch((err) => {
+          console.log("exit fullscreen error => ", err);
+        });
+    }
+  };
+
   const toggleState = (action: string, bufferAction?: boolean) => {
-    console.log("TOGGLE_STATE: ", action); //TODO: remove log
     setPause(action === "pause");
     setBufferAction(!!bufferAction);
   };
@@ -106,7 +145,6 @@ const useContainer: (props: GlobalProps) => {
   const next = (skippedByUser?: boolean) => {
     if (skippedByUser) {
       if (clipDuration !== stepDuration) {
-        console.log("SETTING_SKIPPED => ", cd);
         setResetProgress("clip");
         setSkippedProgress(
           (cd[cursor.step]
@@ -191,9 +229,13 @@ const useContainer: (props: GlobalProps) => {
       styles,
       pause,
       isMuted,
+      fullscreen,
       stepProgress,
       debouncePause,
       mouseUp,
+      next,
+      previous,
+      fullscreenHandler,
     },
     progressArray: inputStories.map((_, i) =>
       i === cursor.step ? stepProgress : i < cursor.step ? 100 : 0
@@ -212,13 +254,18 @@ export const Content: FC<any> = ({
   styles,
   pause,
   isMuted,
+  fullscreen,
   stepProgress,
   debouncePause,
   mouseUp,
+  next,
+  previous,
+  fullscreenHandler,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
-    <div style={{ ...styles?.container }}>
+    // <FullScreen handle={handle}>
+    <div id="stories-container" style={{ ...styles?.container }}>
       <StoriesContext.Provider
         value={{
           stories: inputStories,
@@ -228,20 +275,15 @@ export const Content: FC<any> = ({
           action: toggleState,
           pause,
           isMuted,
+          fullscreen,
+          next,
+          previous,
+          fullscreenHandler,
         }}
       >
         {VideoRenderer && <VideoRenderer />}
       </StoriesContext.Provider>
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          display: "flex",
-          width: "100%",
-          height: "100%",
-        }}
-      >
+      <div style={touchControlContainerStyles}>
         <div
           style={{ width: "50%", zIndex: 999 }}
           onTouchStart={debouncePause}
@@ -258,7 +300,17 @@ export const Content: FC<any> = ({
         />
       </div>
     </div>
+    // </FullScreen>
   );
+};
+
+const touchControlContainerStyles: CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  display: "flex",
+  width: "100%",
+  height: "100%",
 };
 
 export default useContainer;
