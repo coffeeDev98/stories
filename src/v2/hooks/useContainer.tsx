@@ -292,14 +292,14 @@ export const Content: FC<any> = ({
       {!disableTouchEvent && (
         <div style={touchControlContainerStyles}>
           <div
-            style={{ width: "50%", zIndex: 999 }}
+            style={{ width: "30%", zIndex: 999 }}
             onTouchStart={debouncePause}
             onTouchEnd={mouseUp("previous")}
             onMouseDown={debouncePause}
             onMouseUp={mouseUp("previous")}
           />
           <div
-            style={{ width: "50%", zIndex: 999 }}
+            style={{ width: "70%", zIndex: 999 }}
             onTouchStart={debouncePause}
             onTouchEnd={mouseUp("next")}
             onMouseDown={debouncePause}
