@@ -1,54 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Story } from "../types";
-import { isMobile, isSafari } from "../utils";
-// Blob prefetch
-// const prefetch: (
-//   ref: HTMLVideoElement | null,
-//   url: string,
-//   errorCallback: () => void,
-//   onPrefetch: (url: string) => void
-// ) => void = (ref, url, errorCallback, onPrefetch) => {
-//   let xhr = new XMLHttpRequest();
-//   xhr.open("GET", url, true);
-//   xhr.responseType = "blob";
-//   let prevProgCount = 0;
-//   onPrefetch(`${prevProgCount}`);
-//   xhr.addEventListener("progress", function (event) {
-//     if (event.lengthComputable) {
-//       let progCount = Math.round((event.loaded / event.total) * 100);
-//       if (progCount != prevProgCount) {
-//         prevProgCount = progCount;
-//         onPrefetch(`${prevProgCount}`);
-//       }
-//     }
-//   });
-//   xhr.addEventListener(
-//     "load",
-//     () => {
-//       if (xhr.status === 200) {
-//         let URL = window.URL || window.webkitURL;
-//         let blobUrl = URL.createObjectURL(xhr.response);
-//         if (isMobile() || isSafari()) {
-//           navigator?.serviceWorker?.ready.then((reg) => {
-//             if (reg.active) {
-//               reg.active.postMessage({ source: url, blob: xhr.response });
-//               onPrefetch(url);
-//             }
-//           });
-//         } else {
-//           // fetchedCallback(blobUrl, ref);
-//           onPrefetch(blobUrl);
-//         }
-//       } else {
-//         errorCallback();
-//       }
-//     },
-//     false
-//   );
-//   xhr.send();
-// };
 
-// Caches given Story[] using HTMLImageElement and HTMLVideoElement
 const cacheContent = async (contents: Story[]) => {
   const URL = window.URL || window.webkitURL;
   const promises = contents.map((content) => {
@@ -74,10 +26,6 @@ const cacheContent = async (contents: Story[]) => {
         video.onloadedmetadata = () => {
           return resolve({ url: content.url, duration: video.duration * 1000 });
         };
-        // video.onloadeddata = () => {
-        //   console.log("prefetched video => ", video.duration); //TODO: remove log
-        //   return resolve({ url: content.url, duration: video.duration });
-        // };
         video.onerror = reject;
       } catch (err) {
         console.log("prefetch caching error => ", err); //TODO: remove log
@@ -105,8 +53,6 @@ const usePrefetch = (
   const [loaded, setLoaded] = useState<boolean>(false);
 
   useLayoutEffect(() => {
-    // const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
-    // TODO: caching function
     if (step < storyClips.length) {
       storyClips.slice(step, step + 2).forEach((story: Story[], index) => {
         cacheContent(story.filter((meta) => !prefetched.includes(meta.url)))

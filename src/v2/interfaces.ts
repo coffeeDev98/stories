@@ -22,6 +22,7 @@ export interface GlobalProps {
 }
 
 export interface StoriesContext {
+  loader?: JSX.Element;
   stories: Story[][];
   loaded: boolean;
   setLoaded: Function;

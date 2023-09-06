@@ -12,6 +12,7 @@ const Video = (metadata: any) => (props: Props) => {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   const {
+    loader,
     action,
     stories,
     cursor,
@@ -173,7 +174,7 @@ const Video = (metadata: any) => (props: Props) => {
             color: "#ccc",
           }}
         >
-          {!loaded && <RippleLoader />}
+          {!loaded && (loader || <RippleLoader />)}
         </div>
       )}
     </div>

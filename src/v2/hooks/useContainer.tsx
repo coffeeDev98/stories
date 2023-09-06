@@ -49,6 +49,7 @@ const useContainer: (props: GlobalProps) => {
 
   // keyboard handler
   const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
+  const [disableTouchEvent, setDisableTouchEvent] = useState<boolean>(false);
 
   //   refs
   const touchId = useRef<any>();
@@ -57,16 +58,10 @@ const useContainer: (props: GlobalProps) => {
     inputStories,
     cursor
   );
-
+  // configure to input props
   useEffect(() => {
     if (typeof isPaused === "boolean") setPause(isPaused);
   }, [isPaused]);
-  useEffect(() => {
-    console.log("fullscreen => ", fullscreen); //TODO: remove log
-    if (isFullscreen && !fullscreen) fullscreenHandler();
-    // setFullscreen(isFullscreen);
-  }, [isFullscreen, fullscreen]);
-
   useEffect(() => {
     if (inputStories.length > 0) {
       setStories((prev) => {
@@ -78,6 +73,16 @@ const useContainer: (props: GlobalProps) => {
       });
     }
   }, [inputStories]);
+  useEffect(() => {
+    if (isFullscreen && !fullscreen) fullscreenHandler();
+    // setFullscreen(isFullscreen);
+  }, [isFullscreen, fullscreen]);
+  useEffect(() => {
+    typeof keyboardNavigation === "boolean" &&
+      setDisableKeyEvent(!keyboardNavigation);
+    typeof touchNavigation === "boolean" &&
+      setDisableTouchEvent(!touchNavigation);
+  }, [keyboardNavigation, touchNavigation]);
 
   useEffect(() => {
     if (cd.length > 0 && sd.length > 0) {
@@ -129,6 +134,7 @@ const useContainer: (props: GlobalProps) => {
       }
       return { ...prev, clip: 0 };
     });
+    onPrevious?.();
   };
 
   const next = (skippedByUser?: boolean) => {
@@ -156,8 +162,11 @@ const useContainer: (props: GlobalProps) => {
       } else if (prev.clip < inputStories[prev.step].length - 1) {
         return { ...prev, clip: prev.clip + 1 };
       }
+      !loop && onAllStoriesEnd?.();
       return loop ? { step: 0, clip: 0 } : prev;
     });
+    onNext?.();
+    onStoryEnd?.();
   };
 
   const { stepProgress } = useProgress({
@@ -207,6 +216,7 @@ const useContainer: (props: GlobalProps) => {
   return {
     Content,
     contentProps: {
+      loader,
       stories,
       inputStories,
       loaded,
@@ -225,6 +235,7 @@ const useContainer: (props: GlobalProps) => {
       next,
       previous,
       fullscreenHandler,
+      disableTouchEvent,
     },
     progressArray: inputStories.map((_, i) =>
       i === cursor.step ? stepProgress : i < cursor.step ? 100 : 0
@@ -232,6 +243,7 @@ const useContainer: (props: GlobalProps) => {
   };
 };
 export const Content: FC<any> = ({
+  loader,
   stories,
   inputStories,
   loaded,
@@ -250,6 +262,7 @@ export const Content: FC<any> = ({
   next,
   previous,
   fullscreenHandler,
+  disableTouchEvent,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
@@ -260,6 +273,7 @@ export const Content: FC<any> = ({
     >
       <StoriesContext.Provider
         value={{
+          loader,
           stories: inputStories,
           loaded,
           setLoaded,
@@ -275,22 +289,24 @@ export const Content: FC<any> = ({
       >
         {VideoRenderer && <VideoRenderer />}
       </StoriesContext.Provider>
-      <div style={touchControlContainerStyles}>
-        <div
-          style={{ width: "50%", zIndex: 999 }}
-          onTouchStart={debouncePause}
-          onTouchEnd={mouseUp("previous")}
-          onMouseDown={debouncePause}
-          onMouseUp={mouseUp("previous")}
-        />
-        <div
-          style={{ width: "50%", zIndex: 999 }}
-          onTouchStart={debouncePause}
-          onTouchEnd={mouseUp("next")}
-          onMouseDown={debouncePause}
-          onMouseUp={mouseUp("next")}
-        />
-      </div>
+      {!disableTouchEvent && (
+        <div style={touchControlContainerStyles}>
+          <div
+            style={{ width: "50%", zIndex: 999 }}
+            onTouchStart={debouncePause}
+            onTouchEnd={mouseUp("previous")}
+            onMouseDown={debouncePause}
+            onMouseUp={mouseUp("previous")}
+          />
+          <div
+            style={{ width: "50%", zIndex: 999 }}
+            onTouchStart={debouncePause}
+            onTouchEnd={mouseUp("next")}
+            onMouseDown={debouncePause}
+            onMouseUp={mouseUp("next")}
+          />
+        </div>
+      )}
     </div>
     // </FullScreen>
   );
