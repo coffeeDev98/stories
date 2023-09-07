@@ -24,7 +24,10 @@ const cacheContent = async (contents: Story[]) => {
             });
           });
         video.onloadedmetadata = () => {
-          return resolve({ url: content.url, duration: video.duration * 1000 });
+          return resolve({
+            url: content.url,
+            duration: video.duration * 1000,
+          });
         };
         video.onerror = reject;
       } catch (err) {

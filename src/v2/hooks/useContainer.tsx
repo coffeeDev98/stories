@@ -83,6 +83,9 @@ const useContainer: (props: GlobalProps) => {
     }
   }, [inputStories]);
   useEffect(() => {
+    setCursor({ step: inputCursor?.step || 0, clip: 0 });
+  }, [inputCursor?.step]);
+  useEffect(() => {
     if (isFullscreen && !fullscreen) fullscreenHandler();
     // setFullscreen(isFullscreen);
   }, [isFullscreen, fullscreen]);
@@ -332,6 +335,7 @@ export const Content: FC<any> = ({
 const defaultContainerStyles: CSSProperties = {
   position: "relative",
   width: "100%",
+  height: "100%",
 };
 
 const touchControlContainerStyles: CSSProperties = {

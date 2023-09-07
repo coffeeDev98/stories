@@ -22,6 +22,10 @@ const useProgress: (props: any) => { stepProgress: any } = ({
   const animationFrameId = useRef<number>(-1);
   const lastTime = useRef<number>();
 
+  if (!loaded) {
+    cancelAnimationFrame(animationFrameId.current);
+  }
+
   useEffect(() => {
     reset("all");
   }, [cursor.step, stepDuration]);

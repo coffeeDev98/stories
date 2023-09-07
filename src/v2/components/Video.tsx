@@ -72,13 +72,13 @@ const Video = (metadata: any) => (props: Props) => {
   };
 
   const onPlaying = () => {
-    setLoaded(true);
     // check to avoid NotAllo wedError on mac-os(ios) & linux(android)
     if (shouldUnmute() && firstLoad && !pause) {
       muted && !isMuted && toggleMute(false);
       action("play");
       setFirstLoad(false);
     }
+    setLoaded(true);
   };
 
   const videoLoaded = () => {
@@ -92,7 +92,7 @@ const Video = (metadata: any) => (props: Props) => {
         ref.current
           ?.play()
           .then(() => {
-            shouldUnmute() && firstLoad && toggleMute(false);
+            toggleMute(shouldUnmute() ? false : true);
             action("play");
             setFirstLoad(false);
           })
