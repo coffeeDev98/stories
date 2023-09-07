@@ -17,6 +17,7 @@ import { styled } from "styled-components";
 import fscreen from "../components/fscreen";
 
 const useContainer: (props: GlobalProps) => {
+  cursor: Cursor;
   Content: any;
   contentProps: any;
   progressArray: any[];
@@ -222,6 +223,7 @@ const useContainer: (props: GlobalProps) => {
   };
 
   return {
+    cursor,
     Content,
     contentProps: {
       loader,
