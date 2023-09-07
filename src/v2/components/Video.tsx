@@ -7,6 +7,13 @@ import { styled } from "styled-components";
 
 type Props = {};
 
+const shouldUnmute = () => {
+  return (
+    navigator.userActivation.isActive ||
+    !["mac-os", "linux"].includes(detectOS() as "linux" | "mac-os" | "windows")
+  );
+};
+
 const Video = (metadata: any) => (props: Props) => {
   const [muted, setMuted] = useState<boolean>(true);
   const ref = useRef<HTMLVideoElement | null>(null);
@@ -24,6 +31,8 @@ const Video = (metadata: any) => (props: Props) => {
     next,
     previous,
     fullscreenHandler,
+    firstLoad,
+    setFirstLoad,
   } = useContext<StoriesContext>(StoriesCtx);
 
   // useEffect(() => {
@@ -49,8 +58,10 @@ const Video = (metadata: any) => (props: Props) => {
   }, [pause, loaded]);
 
   useEffect(() => {
-    loaded && videoLoaded();
-  }, [loaded]);
+    if (loaded && !pause) {
+      videoLoaded();
+    }
+  }, [loaded, pause]);
 
   const toggleMute = (force?: boolean) => {
     setMuted((prev) => (typeof force === "boolean" ? force : !prev));
@@ -62,16 +73,11 @@ const Video = (metadata: any) => (props: Props) => {
 
   const onPlaying = () => {
     setLoaded(true);
-
-    // check to avoid NotAllowedError on mac-os(ios) & linux(android)
-    if (
-      navigator.userActivation.hasBeenActive ||
-      !["mac-os", "linux"].includes(
-        detectOS() as "linux" | "mac-os" | "windows"
-      )
-    ) {
-      muted && !isMuted && setMuted(false);
+    // check to avoid NotAllo wedError on mac-os(ios) & linux(android)
+    if (shouldUnmute() && firstLoad && !pause) {
+      muted && !isMuted && toggleMute(false);
       action("play");
+      setFirstLoad(false);
     }
   };
 
@@ -82,11 +88,13 @@ const Video = (metadata: any) => (props: Props) => {
         action("play");
       })
       .catch(() => {
-        setMuted(true);
+        toggleMute(true);
         ref.current
           ?.play()
           .then(() => {
+            shouldUnmute() && firstLoad && toggleMute(false);
             action("play");
+            setFirstLoad(false);
           })
           .catch((err) => {
             console.log(

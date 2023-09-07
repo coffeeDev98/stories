@@ -170,7 +170,7 @@ const testData = [
   ],
 ];
 const App = (props: Props) => {
-  const { Content, contentProps, progressArray } = useContainer({
+  const { cursor, Content, contentProps, progressArray } = useContainer({
     stories: isMobile() ? portraitVideos : landscapeVideos,
     loop: true,
     // isPaused: true,

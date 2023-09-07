@@ -13,4 +13,6 @@ export default React.createContext<StoriesContext>({
   next: () => {},
   previous: () => {},
   fullscreenHandler: () => {},
+  firstLoad: true,
+  setFirstLoad: () => {},
 });

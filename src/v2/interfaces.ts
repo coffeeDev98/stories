@@ -37,4 +37,6 @@ export interface StoriesContext {
   next: Function;
   previous: Function;
   fullscreenHandler: Function;
+  firstLoad: boolean;
+  setFirstLoad: Function;
 }

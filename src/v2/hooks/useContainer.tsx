@@ -40,6 +40,7 @@ const useContainer: (props: GlobalProps) => {
   touchNavigation,
   styles,
 }) => {
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [stories, setStories] = useState<any[][]>([]);
   const [cursor, setCursor] = useState<Cursor>(
     inputCursor && inputStories[inputCursor?.step].length > 0
@@ -246,6 +247,8 @@ const useContainer: (props: GlobalProps) => {
       previous,
       fullscreenHandler,
       disableTouchEvent,
+      firstLoad,
+      setFirstLoad,
     },
     progressArray: inputStories.map((_, i) =>
       i === cursor.step ? stepProgress : i < cursor.step ? 100 : 0
@@ -273,6 +276,8 @@ export const Content: FC<any> = ({
   previous,
   fullscreenHandler,
   disableTouchEvent,
+  firstLoad,
+  setFirstLoad,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
@@ -295,6 +300,8 @@ export const Content: FC<any> = ({
           next,
           previous,
           fullscreenHandler,
+          firstLoad,
+          setFirstLoad,
         }}
       >
         {VideoRenderer && <VideoRenderer />}
