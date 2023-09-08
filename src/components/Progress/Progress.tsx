@@ -1,35 +1,31 @@
 import React from "react";
-import { useContext } from "react";
-import { ProgressContext } from "../interfaces";
-import ProgressCtx from "../context/Progress";
 import ProgressWrapper from "./ProgressWrapper";
 
 type Props = {
   width: number;
-  active: number;
   count: number;
 };
-export default ({ width, active, count }: Props) => {
-  const { pause } = useContext<ProgressContext>(ProgressCtx);
-  const getProgressStyle = ({ active }: { active: number }) => {
-    switch (active) {
-      case 2:
-        return { width: "100%" };
-      case 1:
-        return { transform: `scaleX(${count / 100})` };
-      case 0:
-        return { width: 0 };
-      default:
-        return { width: 0 };
-    }
-  };
+export default ({ width, count }: Props) => {
+  // const getProgressStyle = ({ active }: { active: number }) => {
+  //   switch (active) {
+  //     case 2:
+  //       return { width: "100%" };
+  //     case 1:
+  //       return { transform: `scaleX(${count})` };
+  //     case 0:
+  //       return { width: 0 };
+  //     default:
+  //       return { width: 0 };
+  //   }
+  // };
 
   return (
-    <ProgressWrapper width={width} pause={pause}>
+    <ProgressWrapper width={width}>
       <div
         style={{
           ...styles.inner,
-          ...getProgressStyle({ active }),
+          transform: `scaleX(${count / 100})`,
+          // ...getProgressStyle({ active }),
         }}
       />
     </ProgressWrapper>

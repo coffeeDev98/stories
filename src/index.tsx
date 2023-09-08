@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import AppV2 from "./App";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -16,5 +16,5 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-createRoot(document.getElementById("root") as HTMLElement).render(<App />);
+createRoot(document.getElementById("root") as HTMLElement).render(<AppV2 />);
 // ReactDOM.render(<App />, document.getElementById("root"));

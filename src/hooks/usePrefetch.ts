@@ -1,74 +1,37 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Story } from "../interfaces";
-import { conver2Dto1DIndex, isMobile, isSafari } from "../utils";
+import { Story } from "../types";
 
-const fetchedCallback: (blobUrl: any, ref: HTMLVideoElement | null) => void = (
-  blobUrl,
-  ref
-) => {
-  if (ref) {
-    ref.src = blobUrl;
-  }
-};
-// Blob prefetch
-const prefetch: (
-  ref: HTMLVideoElement | null,
-  url: string,
-  errorCallback: () => void,
-  onPrefetch: (url: string) => void
-) => void = (ref, url, errorCallback, onPrefetch) => {
-  let xhr = new XMLHttpRequest();
-  xhr.open("GET", url, true);
-  xhr.responseType = "blob";
-  let prevProgCount = 0;
-  onPrefetch(`${prevProgCount}`);
-  xhr.addEventListener("progress", function (event) {
-    if (event.lengthComputable) {
-      let progCount = Math.round((event.loaded / event.total) * 100);
-      if (progCount != prevProgCount) {
-        prevProgCount = progCount;
-        onPrefetch(`${prevProgCount}`);
-      }
-    }
-  });
-  xhr.addEventListener(
-    "load",
-    () => {
-      if (xhr.status === 200) {
-        let URL = window.URL || window.webkitURL;
-        let blobUrl = URL.createObjectURL(xhr.response);
-        // if (isMobile() || isSafari()) {
-        navigator?.serviceWorker?.ready.then((reg) => {
-          if (reg.active) {
-            reg.active.postMessage({ source: url, blob: xhr.response });
-            onPrefetch(url);
-          }
-        });
-        // } else {
-        //   fetchedCallback(blobUrl, ref);
-        //   onPrefetch(url);
-        // }
-      } else {
-        errorCallback();
-      }
-    },
-    false
-  );
-  xhr.send();
-};
-
-// Caches given Story[] using HTMLImageElement and HTMLVideoElement
 const cacheContent = async (contents: Story[]) => {
+  const URL = window.URL || window.webkitURL;
   const promises = contents.map((content) => {
+    const video = document.createElement("video");
     return new Promise((resolve, reject) => {
       if (!content.url) return;
+      try {
+        fetch(content.url)
+          .then((response) => response.blob())
+          .then((blob) => {
+            video.src = URL.createObjectURL(blob);
 
-      if (content.__typename.toLowerCase() === "video") {
-        const video = document.createElement("video");
-        video.src = content.url;
-        video.onloadeddata = () => resolve(video.duration);
+            navigator?.serviceWorker?.ready.then((reg) => {
+              if (reg.active) {
+                reg.active.postMessage({ source: content.url, blob: blob });
+                return resolve({
+                  url: content.url,
+                  duration: content.duration * 1000,
+                });
+              }
+            });
+          });
+        video.onloadedmetadata = () => {
+          return resolve({
+            url: content.url,
+            duration: video.duration * 1000,
+          });
+        };
         video.onerror = reject;
-        return;
+      } catch (err) {
+        console.log("prefetch caching error => ", err); //TODO: remove log
       }
     });
   });
@@ -78,59 +41,53 @@ const cacheContent = async (contents: Story[]) => {
 
 const usePrefetch = (
   storyClips: Story[][],
-  cursor: { step: number; clip: number },
-  setLoaded: React.Dispatch<React.SetStateAction<boolean>>,
-  prefetchCount: number = 2
-) => {
-  const { step, clip } = cursor;
-  const [sd, setSd] = useState<number[]>([]);
+  cursor: { step: number; clip: number }
+  //   setLoaded: React.Dispatch<React.SetStateAction<boolean>>
+): {
+  sd: number[];
+  cd: number[][];
+  loaded: boolean;
+  setLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+  forStep?: number;
+} => {
   const [prefetched, setPrefetched] = useState<string[]>([]);
+  const { step, clip } = cursor;
+  const [cd, setCd] = useState<number[][]>([]);
+  const [loaded, setLoaded] = useState<boolean>(false);
+
   useLayoutEffect(() => {
-    // const flatIndex = conver2Dto1DIndex(storyClips, step, clip);
-    // if (step + 1 < storyClips.length) {
-    //   setLoaded(false);
-
-    //   cacheContent(storyClips[step + 1]).then((duration: any[]) => {
-    //     setSd(duration);
-    //   });
-    // }
-    // setLoaded(() => {
-    //   return true;
-    // });
-
-    // const el = document.getElementById(`clip-${step}.${clip}`);
-    // if (el) {
-    if (step + 1 < storyClips.length) {
-      storyClips[step + 1].map((c: Story) => {
-        if (prefetched?.includes(c.url)) {
-          console.log("SKIPPING_PREFETCH");
-          return;
-        }
-        prefetch(
-          null, //el as HTMLVideoElement,
-          c.url,
-          () => {},
-          (url: string) => {
-            setPrefetched((prev) => [...prev, url]);
-            // setLoaded(true);
-          }
-        );
+    if (step < storyClips.length) {
+      storyClips.slice(step, step + 2).forEach((story: Story[], index) => {
+        cacheContent(story.filter((meta) => !prefetched.includes(meta.url)))
+          .then((c: Array<any>) => {
+            if (c.length === 0) return;
+            const temp: number[][] = cd;
+            temp[storyClips.findIndex((s) => s[0].url === c[0].url)] = c.map(
+              (item) => item.duration
+            );
+            setCd(temp);
+            setPrefetched(c.map((item) => item.url));
+            setLoaded(true);
+          })
+          .catch((err) => {
+            console.log("prefetch error => ", err); //TODO: remove log
+          });
       });
     }
-    // }
-  }, [
-    storyClips,
-    // document.getElementById(`clip-${step}.${clip}`),
-    cursor.step,
-  ]);
+  }, [storyClips, cursor]);
+
+  useEffect(() => {
+    setLoaded(false);
+  }, [cursor]);
 
   return {
-    sd: sd.reduce((sum, d) => sum + d, 0),
-    ...(sd.length > 0 && {
+    sd: cd.map((c) => c.reduce((sum, d) => sum + d, 0)),
+    cd,
+    loaded,
+    setLoaded,
+    ...(cd.length > 0 && {
       forStep: step + 1 < storyClips.length ? step + 1 : step,
     }),
-    setSd,
-    cd: clip < storyClips[step].length ? sd[clip] : sd[0],
   };
 };
 export default usePrefetch;

@@ -1,14 +1,106 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import Video from "./components/renderers/Video";
-import ProgressContext from "./context/Progress";
-import StoriesContext from "./context/Stories";
-import ProgressArray from "./components/ProgressArray";
-import { Story } from "./interfaces";
-import usePrefetch from "./hooks/usePrefetch";
-import { FullScreen, useFullScreenHandle } from "react-full-screen";
-import { Maybe } from "./types";
+import React from "react";
+import useContainer from "./hooks/useContainer";
+import Progress from "./components/Progress/Progress";
+import { isMobile } from "./utils";
 
 type Props = {};
+const landscapeVideos = [
+  [
+    {
+      id: "3591",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Landscape1.jpg",
+      duration: 22.122104,
+      __typename: "Video",
+    },
+    {
+      id: "3593",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Landscape1.jpg",
+      duration: 27.027,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3595",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Typical%20Ratios%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Typical%20Ratios%20-%20Landscape1.jpg",
+      duration: 32.5325,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3597",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Standard+Steps+-+Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Standard%20Steps%20-%20Landscape1.jpg",
+      duration: 68.635233,
+      __typename: "Video",
+    },
+    {
+      id: "3599",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Visual+Cues+-+Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Visual%20Cues%20-%20Landscape1.jpg",
+      duration: 53.486771,
+      __typename: "Video",
+    },
+    {
+      id: "3601",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Landscape1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Landscape1.jpg",
+      duration: 13.880542,
+      __typename: "Video",
+    },
+  ],
+];
+
+const portraitVideos = [
+  [
+    {
+      id: "3592",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Intro%20-%20Portrait1.jpg",
+      duration: 22.222208,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3594",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Ingredient%20categories%20-%20Portrait1.jpg",
+      duration: 27.027,
+      __typename: "Video",
+    },
+    {
+      id: "3600",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast+Cooking+Tomato+Sauce+Based+Pastas/Fast+Cooking+Tomato+Sauce+Based+Pastas+-+Visual+Cues+-+Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Visual%20Cues%20-%20Portrait1.jpg",
+      duration: 53.486771,
+      __typename: "Video",
+    },
+  ],
+  [
+    {
+      id: "3602",
+      url: "https://static.pixical.com/videos/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Portrait1.mp4",
+      thumbnailUrl:
+        "https://static.pixical.com/thumbnails/cooking/recipe-overview/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas/Fast%20Cooking%20Tomato%20Sauce%20Based%20Pastas%20-%20Wrap%20-%20Portrait1.jpg",
+      duration: 13.9139,
+      __typename: "Video",
+    },
+  ],
+];
 
 const testData = [
   [
@@ -76,280 +168,32 @@ const testData = [
     },
   ],
 ];
-
-const getStepDuration = async (step: any[], stepId: number) => {
-  const clipPromises = step.map((clip: any, idx: number) => {
-    return new Promise(function (resolve, reject) {
-      if (!clip.url) return;
-      const video = document.createElement("video");
-      video.id = `${stepId}.${idx}`;
-      video.src = clip.url;
-      video.onloadeddata = () => resolve(video.duration);
-      video.onerror = reject;
-      return;
-    });
-  });
-
-  let sum = 0;
-  await Promise.all(clipPromises).then((values) => {
-    values.forEach((v: any) => {
-      sum += v;
-    });
-  });
-  return sum;
-};
-
 const App = (props: Props) => {
-  const storyClips: Story[][] = testData;
-  const [stories, setStories] = useState<any>([]);
-  const [stepDuration, setStepDuration] = useState<number>(0);
-  const [clipDuration, setClipDuration] = useState<number>(0);
-  const [fullscreen, setFullscreen] = useState<boolean>(false);
-  const [pause, setPause] = useState<boolean>(false);
-  const [currentId, setCurrentId] = useState<{ step: number; clip: number }>({
-    step: 0,
-    clip: 0,
+  const { cursor, Content, contentProps, progressArray } = useContainer({
+    stories: isMobile() ? portraitVideos : landscapeVideos,
+    loop: true,
+    // isPaused: true,
+    // isFullscreen: true,
+    // cursor: { step: 1, clip: 0 },
+    styles: {},
   });
-  const [skippedProgress, setSkippedProgress] = useState<number>(0);
-  // keyboard handler
-  const [disableKeyEvent, setDisableKeyEvent] = useState<boolean>(false);
-  const [resetProgress, setResetProgress] =
-    useState<Maybe<"all" | "step" | "clip">>();
-  const touchId = useRef<any>();
-
-  const fsHandle = useFullScreenHandle();
-
-  const [loaded, setLoaded] = useState<boolean>(false);
-
-  const { forStep, sd, cd, setSd } = usePrefetch(
-    storyClips,
-    currentId,
-    setLoaded
-  );
-
-  // useEffect(() => {
-  //   console.log("SD: ", sd, cd);
-  // }, [sd, cd]);
-
-  useEffect(() => {
-    console.log(
-      `loaded => %c${loaded}%c,  pause => %c${pause}%c,  stepDuration => %c${stepDuration}%c,  clipDuration => %c${clipDuration}%c, currentId => %c${currentId.step},${currentId.clip}%c,  forStep => %c${forStep}%c,  sd => %c${sd}%c`,
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white",
-      "color: cornflowerblue",
-      "color: white"
-    );
-    // console.table({ loaded, pause, stepDuration, clipDuration, forStep, sd });
-  }, [loaded, pause, stepDuration, clipDuration, forStep, sd, currentId]);
-
-  useEffect(() => {
-    setStories(() => {
-      const temp = storyClips.map((step: any, index) => {
-        return step.map((clip: any, idx: number) => {
-          return Video({ step: index, clip: idx });
-        });
-      });
-      return temp;
-    });
-  }, []);
-
-  useLayoutEffect(() => {
-    setLoaded(false);
-  }, [currentId]);
-
-  // useLayoutEffect(() => {
-  //   if (currentId.step === storyClips.length - 1) return;
-  //   setSd([]);
-  // }, [currentId.step]);
-
-  useEffect(() => {
-    // setStepDuration(0);
-    // setClipDuration(0);
-
-    if (forStep && currentId.step === forStep) {
-      setStepDuration(sd * 1000);
-      if (currentId.step === storyClips.length - 1) return;
-      setSd([]);
-      return;
-    }
-    setSkippedProgress(0);
-    getStepDuration(storyClips[currentId.step], currentId.step).then((d) => {
-      setStepDuration(d * 1000);
-      setLoaded(true);
-    });
-  }, [currentId.step]);
-
-  useEffect(() => {
-    if (!disableKeyEvent) {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.addEventListener("keydown", handleKeyDown);
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [disableKeyEvent, stepDuration, clipDuration]);
-
-  const action = (action: "pause" | "play") => {
-    setPause(() => action === "pause");
-  };
-
-  const togglePause = (forceState?: boolean) => {
-    setPause((prev) => {
-      return forceState ? forceState : !prev;
-    });
-  };
-
-  const previous = (skippedByUser?: boolean) => {
-    if (skippedByUser) {
-      setResetProgress("all");
-    }
-    setCurrentId((prev) => {
-      if (prev.step > 0) {
-        return { step: prev.step - 1, clip: 0 };
-      }
-      return { ...prev, clip: 0 };
-    });
-  };
-
-  const next = (skippedByUser?: boolean) => {
-    if (skippedByUser) {
-      if (clipDuration !== stepDuration) {
-        console.log("SETTING_SKIPPED");
-        setResetProgress("clip");
-        setSkippedProgress((clipDuration * 100) / stepDuration);
-      } else {
-        setResetProgress("all");
-      }
-    }
-    setCurrentId((prev) => {
-      console.log("PREV_CURSOR: ", prev);
-      if (prev.step < storyClips.length - 1) {
-        if (prev.clip < storyClips[prev.step].length - 1) {
-          return { ...prev, clip: prev.clip + 1 };
-        } else {
-          return { step: prev.step + 1, clip: 0 };
-        }
-      } else if (prev.clip < storyClips[prev.step].length - 1) {
-        return { ...prev, clip: prev.clip + 1 };
-      }
-      return { step: 0, clip: 0 };
-    });
-  };
-
-  const debouncePause = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    touchId.current = setTimeout(() => {
-      togglePause(true);
-    }, 200);
-  };
-
-  const mouseUp =
-    (type: string) => (e: React.MouseEvent | React.TouchEvent) => {
-      e.preventDefault();
-      touchId.current && clearTimeout(touchId.current);
-      if (pause) {
-        togglePause(false);
-      } else {
-        type === "next" ? next(true) : previous(true);
-      }
-    };
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.key === "ArrowLeft") {
-      previous(true);
-    } else if (e.key === "ArrowRight") {
-      next(true);
-    } else if (e.key === " ") {
-      e.preventDefault();
-      togglePause();
-    }
-  };
-
-  const CurrentVideo = stories?.[currentId.step]?.[currentId.clip];
   return (
-    <div style={{ position: "relative", height: "max-content" }}>
-      <StoriesContext.Provider
-        value={{
-          stories: storyClips,
-          loaded,
-          setLoaded,
-          cursor: currentId,
-        }}
-      >
-        <ProgressContext.Provider
-          value={{
-            currentId,
-            stepDuration,
-            clipDuration,
-            pause,
-            togglePause,
-            previous,
-            next,
-            skippedProgress: skippedProgress,
-            resetProgress: resetProgress,
-            onProgressReset: () => {
-              setResetProgress(null);
-            },
-          }}
-        >
-          {/* <ProgressArray /> */}
-          {clipDuration && stepDuration ? <ProgressArray /> : null}
-        </ProgressContext.Provider>
-        <FullScreen handle={fsHandle}>
-          {CurrentVideo && (
-            <CurrentVideo
-              story={storyClips[currentId.step][currentId.clip]}
-              getClipDuration={(cd: any) => {
-                setClipDuration(cd * 1000);
-                // clipDuration.current = cd * 1000;
-                // setLoaded(true);
-              }}
-              isPaused={pause}
-              action={action}
-              //   onEnded={() => {
-              //     next();
-              //   }}
-            />
-          )}
-        </FullScreen>
-      </StoriesContext.Provider>
+    <div style={{ position: "relative" }}>
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          display: "flex",
           width: "100%",
-          height: "100%",
+          display: "flex",
+          position: "absolute",
+          top: 2,
+          zIndex: 2,
         }}
       >
-        <div
-          style={{ width: "50%", zIndex: 999 }}
-          onTouchStart={debouncePause}
-          onTouchEnd={mouseUp("previous")}
-          onMouseDown={debouncePause}
-          onMouseUp={mouseUp("previous")}
-        />
-        <div
-          style={{ width: "50%", zIndex: 999 }}
-          onTouchStart={debouncePause}
-          onTouchEnd={mouseUp("next")}
-          onMouseDown={debouncePause}
-          onMouseUp={mouseUp("next")}
-        />
+        {progressArray.map((p, i) => (
+          <Progress key={i} width={1 / progressArray.length} count={p} />
+        ))}
       </div>
+
+      <Content {...contentProps} />
     </div>
   );
 };

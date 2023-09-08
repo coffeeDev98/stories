@@ -4,7 +4,6 @@ import React, { useContext } from "react";
 type Props = {
   children: any;
   width: number;
-  pause: boolean;
 };
 
 const ProgressWrapper = (props: Props) => {
