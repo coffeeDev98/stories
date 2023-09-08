@@ -22,7 +22,7 @@ const useProgress: (props: any) => { stepProgress: any } = ({
   const animationFrameId = useRef<number>(-1);
   const lastTime = useRef<number>();
 
-  if (!loaded) {
+  if (!loaded || pause) {
     cancelAnimationFrame(animationFrameId.current);
   }
 
@@ -75,10 +75,10 @@ const useProgress: (props: any) => { stepProgress: any } = ({
   let clipProgressCopy = clipProgress;
 
   const incrementCount = () => {
-    if (!loaded || pause) {
-      cancelAnimationFrame(animationFrameId.current);
-      return;
-    }
+    // if (!loaded || pause) {
+    //   cancelAnimationFrame(animationFrameId.current);
+    //   return;
+    // }
 
     if (lastTime.current == undefined) lastTime.current = timestamp();
     const t = timestamp();
