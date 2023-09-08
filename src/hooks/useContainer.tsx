@@ -18,6 +18,7 @@ import fscreen from "../components/fscreen";
 
 const useContainer: (props: GlobalContext) => {
   cursor: Cursor;
+  fullscreen: boolean;
   Content: any;
   contentProps: any;
   progressArray: any[];
@@ -229,6 +230,7 @@ const useContainer: (props: GlobalContext) => {
 
   return {
     cursor,
+    fullscreen,
     Content,
     contentProps: {
       loader,

@@ -5,9 +5,18 @@ interface StylingProps {
   styles?: {
     container?: CSSProperties;
     video?: CSSProperties;
-    mediaControls?: CSSProperties;
+    mediaControls?: {
+      container?: CSSProperties;
+      close?: CSSProperties;
+      prev?: CSSProperties;
+      play?: CSSProperties;
+      next?: CSSProperties;
+      volume?: CSSProperties;
+      fullscreen?: CSSProperties;
+    };
   };
   icons?: {
+    close?: any;
     prev?: any;
     pause?: any;
     play?: any;

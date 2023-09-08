@@ -108,12 +108,9 @@ const Video = (metadata: any) => (props: Props) => {
   };
 
   return (
-    <div
+    <VideoContainer
       style={{
-        position: "relative",
         ...(fullscreen && {
-          width: "100%",
-          height: "100%",
           ...(isMobile() && { position: "static", top: 0, left: 0 }),
         }),
       }}
@@ -150,21 +147,51 @@ const Video = (metadata: any) => (props: Props) => {
         playsInline
         autoPlay
       />
-
-      <MediaControl style={{ ...styles?.mediaControls }}>
-        <div id="prev" onClick={() => previous(true)}>
+      {fullscreen && (
+        <div
+          id="close"
+          onClick={() => {
+            fullscreenHandler();
+          }}
+          style={{ ...styles?.mediaControls?.close }}
+        >
+          {icons?.close || "close"}
+        </div>
+      )}
+      <MediaControl style={{ ...styles?.mediaControls?.container }}>
+        <div
+          id="prev"
+          onClick={() => previous(true)}
+          style={{ ...styles?.mediaControls?.prev }}
+        >
           {icons?.prev || "prev"}
         </div>
-        <div id="play" onClick={() => action(pause ? "play" : "pause")}>
+        <div
+          id="play"
+          onClick={() => action(pause ? "play" : "pause")}
+          style={{ ...styles?.mediaControls?.play }}
+        >
           {pause ? icons?.play || "play" : icons?.pause || "pause"}
         </div>
-        <div id="next" onClick={() => next(true)}>
+        <div
+          id="next"
+          onClick={() => next(true)}
+          style={{ ...styles?.mediaControls?.next }}
+        >
           {icons?.next || "next"}
         </div>
-        <div id="volume" onClick={() => toggleMute()}>
+        <div
+          id="volume"
+          onClick={() => toggleMute()}
+          style={{ ...styles?.mediaControls?.volume }}
+        >
           {muted ? icons?.mute || "unmute" : icons?.unmute || "mute"}
         </div>
-        <div id="fullscreen" onClick={() => fullscreenHandler()}>
+        <div
+          id="fullscreen"
+          onClick={() => fullscreenHandler()}
+          style={{ ...styles?.mediaControls?.fullscreen }}
+        >
           {fullscreen
             ? icons?.shrink || "exit fullscreen"
             : icons?.expand || "fullscreen"}
@@ -190,9 +217,21 @@ const Video = (metadata: any) => (props: Props) => {
           {!loaded && (loader || <RippleLoader />)}
         </div>
       )}
-    </div>
+    </VideoContainer>
   );
 };
+
+const VideoContainer = styled.div`
+  position: "relative";
+  width: 100%;
+  height: 100%;
+  #close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+  }
+`;
 
 const MediaControl = styled.div`
   position: absolute;
