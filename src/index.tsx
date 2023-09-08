@@ -1,8 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
-import AppV2 from "./v2/App";
-import App from "./App";
+import AppV2 from "./App";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
