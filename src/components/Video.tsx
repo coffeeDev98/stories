@@ -1,9 +1,15 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  CSSProperties,
+} from "react";
 import { StoriesContext } from "../interfaces";
 import StoriesCtx from "../context/Stories";
 import { RippleLoader } from "./RippleLoader";
 import { detectBrowser, detectOS, isMobile } from "../utils";
-import { styled } from "styled-components";
+import { css, styled } from "styled-components";
 
 type Props = {};
 
@@ -35,6 +41,9 @@ const Video = (metadata: any) => (props: Props) => {
     setFirstLoad,
     styles,
     icons,
+    disableTouchEvent,
+    debouncePause,
+    mouseUp,
   } = useContext<StoriesContext>(StoriesCtx);
 
   // useEffect(() => {
@@ -109,10 +118,9 @@ const Video = (metadata: any) => (props: Props) => {
 
   return (
     <VideoContainer
+      fullscreen={fullscreen}
       style={{
-        ...(fullscreen && {
-          ...(isMobile() && { position: "static", top: 0, left: 0 }),
-        }),
+        ...styles?.videoContainer,
       }}
     >
       <video
@@ -147,49 +155,65 @@ const Video = (metadata: any) => (props: Props) => {
         playsInline
         autoPlay
       />
-      {fullscreen && (
-        <div
-          id="close"
-          onClick={() => {
-            fullscreenHandler();
-          }}
-          style={{ ...styles?.mediaControls?.close }}
-        >
-          {icons?.close || "close"}
-        </div>
-      )}
+      <div
+        id="close"
+        onClick={(e) => {
+          e.stopPropagation();
+          fullscreenHandler();
+        }}
+        style={{
+          ...styles?.mediaControls?.close,
+        }}
+      >
+        {icons?.close || "close"}
+      </div>
       <MediaControl style={{ ...styles?.mediaControls?.container }}>
         <div
           id="prev"
-          onClick={() => previous(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            previous(true);
+          }}
           style={{ ...styles?.mediaControls?.prev }}
         >
           {icons?.prev || "prev"}
         </div>
         <div
           id="play"
-          onClick={() => action(pause ? "play" : "pause")}
+          onClick={(e) => {
+            e.stopPropagation();
+            action(pause ? "play" : "pause");
+          }}
           style={{ ...styles?.mediaControls?.play }}
         >
           {pause ? icons?.play || "play" : icons?.pause || "pause"}
         </div>
         <div
           id="next"
-          onClick={() => next(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            next(true);
+          }}
           style={{ ...styles?.mediaControls?.next }}
         >
           {icons?.next || "next"}
         </div>
         <div
           id="volume"
-          onClick={() => toggleMute()}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleMute();
+          }}
           style={{ ...styles?.mediaControls?.volume }}
         >
           {muted ? icons?.mute || "unmute" : icons?.unmute || "mute"}
         </div>
         <div
           id="fullscreen"
-          onClick={() => fullscreenHandler()}
+          onClick={(e) => {
+            e.stopPropagation();
+            fullscreenHandler();
+          }}
           style={{ ...styles?.mediaControls?.fullscreen }}
         >
           {fullscreen
@@ -197,7 +221,24 @@ const Video = (metadata: any) => (props: Props) => {
             : icons?.expand || "fullscreen"}
         </div>
       </MediaControl>
-
+      {!disableTouchEvent && (
+        <div style={touchControlContainerStyles}>
+          <div
+            style={{ width: "30%", zIndex: 2 }}
+            onTouchStart={debouncePause}
+            onTouchEnd={mouseUp("previous")}
+            onMouseDown={debouncePause}
+            onMouseUp={mouseUp("previous")}
+          />
+          <div
+            style={{ width: "70%", zIndex: 2 }}
+            onTouchStart={debouncePause}
+            onTouchEnd={mouseUp("next")}
+            onMouseDown={debouncePause}
+            onMouseUp={mouseUp("next")}
+          />
+        </div>
+      )}
       {!loaded && (
         <div
           style={{
@@ -221,16 +262,34 @@ const Video = (metadata: any) => (props: Props) => {
   );
 };
 
-const VideoContainer = styled.div`
-  position: "relative";
-  width: 100%;
-  height: 100%;
-  #close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 1000;
-  }
+const VideoContainer = styled.div<{ fullscreen: boolean }>`
+  ${({ fullscreen }) => css`
+    position: "relative";
+    width: 100%;
+    height: 100%;
+    #close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      cursor: pointer;
+      ${fullscreen
+        ? css`
+            z-index: 3;
+          `
+        : css`
+            display: none;
+          `}
+    }
+    @media (max-width: 768px) {
+      ${fullscreen &&
+      css`
+        position: fixed;
+        top: 0;
+        left: 0;
+      `}
+    }
+  `}
 `;
 
 const MediaControl = styled.div`
@@ -246,6 +305,16 @@ const MediaControl = styled.div`
   background: black;
   div {
     margin: 0 10px;
+    cursor: pointer;
   }
 `;
+
+const touchControlContainerStyles: CSSProperties = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  display: "flex",
+  width: "100%",
+  height: "100%",
+};
 export default Video;

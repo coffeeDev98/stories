@@ -4,7 +4,7 @@ import { Cursor, Story } from "./types";
 interface StylingProps {
   styles?: {
     container?: CSSProperties;
-    video?: CSSProperties;
+    videoContainer?: CSSProperties;
     mediaControls?: {
       container?: CSSProperties;
       close?: CSSProperties;
@@ -61,4 +61,7 @@ export interface StoriesContext extends StylingProps {
   fullscreenHandler: Function;
   firstLoad: boolean;
   setFirstLoad: Function;
+  disableTouchEvent: boolean;
+  debouncePause: (e: any) => void;
+  mouseUp: Function;
 }

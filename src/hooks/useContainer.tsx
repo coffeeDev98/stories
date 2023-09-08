@@ -286,6 +286,7 @@ export const Content: FC<any> = ({
   setFirstLoad,
   styles,
   icons,
+  progressBar,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
@@ -294,6 +295,7 @@ export const Content: FC<any> = ({
       id="stories-container"
       style={{ ...defaultContainerStyles, ...styles?.container }}
     >
+      {progressBar}
       <StoriesContext.Provider
         value={{
           loader,
@@ -312,28 +314,13 @@ export const Content: FC<any> = ({
           setFirstLoad,
           styles,
           icons,
+          disableTouchEvent,
+          debouncePause,
+          mouseUp,
         }}
       >
         {VideoRenderer && <VideoRenderer />}
       </StoriesContext.Provider>
-      {!disableTouchEvent && (
-        <div style={touchControlContainerStyles}>
-          <div
-            style={{ width: "30%", zIndex: 999 }}
-            onTouchStart={debouncePause}
-            onTouchEnd={mouseUp("previous")}
-            onMouseDown={debouncePause}
-            onMouseUp={mouseUp("previous")}
-          />
-          <div
-            style={{ width: "70%", zIndex: 999 }}
-            onTouchStart={debouncePause}
-            onTouchEnd={mouseUp("next")}
-            onMouseDown={debouncePause}
-            onMouseUp={mouseUp("next")}
-          />
-        </div>
-      )}
     </div>
     // </FullScreen>
   );
@@ -341,15 +328,6 @@ export const Content: FC<any> = ({
 
 const defaultContainerStyles: CSSProperties = {
   position: "relative",
-  width: "100%",
-  height: "100%",
-};
-
-const touchControlContainerStyles: CSSProperties = {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  display: "flex",
   width: "100%",
   height: "100%",
 };

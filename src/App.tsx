@@ -179,21 +179,24 @@ const App = (props: Props) => {
   });
   return (
     <div style={{ position: "relative" }}>
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          position: "absolute",
-          top: 2,
-          zIndex: 2,
-        }}
-      >
-        {progressArray.map((p, i) => (
-          <Progress key={i} width={1 / progressArray.length} count={p} />
-        ))}
-      </div>
-
-      <Content {...contentProps} />
+      <Content
+        {...contentProps}
+        progressBar={
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              position: "absolute",
+              top: 2,
+              zIndex: 2,
+            }}
+          >
+            {progressArray.map((p, i) => (
+              <Progress key={i} width={1 / progressArray.length} count={p} />
+            ))}
+          </div>
+        }
+      />
     </div>
   );
 };

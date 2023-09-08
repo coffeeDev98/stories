@@ -15,4 +15,7 @@ export default React.createContext<StoriesContext>({
   fullscreenHandler: () => {},
   firstLoad: true,
   setFirstLoad: () => {},
+  disableTouchEvent: false,
+  debouncePause: () => {},
+  mouseUp: () => {},
 });
