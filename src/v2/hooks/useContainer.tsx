@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { GlobalProps } from "../interfaces";
+import { GlobalContext } from "../interfaces";
 import { Cursor, Maybe, Story } from "../types";
 import usePrefetch from "./usePrefetch";
 import StoriesContext from "../context/Stories";
@@ -16,7 +16,7 @@ import useProgress from "./useProgress";
 import { styled } from "styled-components";
 import fscreen from "../components/fscreen";
 
-const useContainer: (props: GlobalProps) => {
+const useContainer: (props: GlobalContext) => {
   cursor: Cursor;
   Content: any;
   contentProps: any;
@@ -39,6 +39,7 @@ const useContainer: (props: GlobalProps) => {
   keyboardNavigation,
   touchNavigation,
   styles,
+  icons,
 }) => {
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [stories, setStories] = useState<any[][]>([]);
@@ -239,7 +240,6 @@ const useContainer: (props: GlobalProps) => {
       toggleState,
       stepDuration,
       clipDuration,
-      styles,
       pause,
       isMuted,
       fullscreen,
@@ -252,6 +252,8 @@ const useContainer: (props: GlobalProps) => {
       disableTouchEvent,
       firstLoad,
       setFirstLoad,
+      styles,
+      icons,
     },
     progressArray: inputStories.map((_, i) =>
       i === cursor.step ? stepProgress : i < cursor.step ? 100 : 0
@@ -268,7 +270,6 @@ export const Content: FC<any> = ({
   toggleState,
   stepDuration,
   clipDuration,
-  styles,
   pause,
   isMuted,
   fullscreen,
@@ -281,6 +282,8 @@ export const Content: FC<any> = ({
   disableTouchEvent,
   firstLoad,
   setFirstLoad,
+  styles,
+  icons,
 }) => {
   const VideoRenderer = stories[cursor.step]?.[cursor.clip];
   return (
@@ -305,6 +308,8 @@ export const Content: FC<any> = ({
           fullscreenHandler,
           firstLoad,
           setFirstLoad,
+          styles,
+          icons,
         }}
       >
         {VideoRenderer && <VideoRenderer />}

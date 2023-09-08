@@ -1,7 +1,24 @@
 import { CSSProperties } from "react";
 import { Cursor, Story } from "./types";
 
-export interface GlobalProps {
+interface StylingProps {
+  styles?: {
+    container?: CSSProperties;
+    video?: CSSProperties;
+    mediaControls?: CSSProperties;
+  };
+  icons?: {
+    prev?: any;
+    pause?: any;
+    play?: any;
+    next?: any;
+    mute?: any;
+    unmute?: any;
+    expand?: any;
+    shrink?: any;
+  };
+}
+export interface GlobalContext extends StylingProps {
   cursor?: Cursor;
   stories: Story[][];
   loader?: JSX.Element;
@@ -18,13 +35,9 @@ export interface GlobalProps {
   onPlay?: Function;
   keyboardNavigation?: boolean;
   touchNavigation?: boolean;
-  styles?: {
-    container?: CSSProperties;
-    video?: CSSProperties;
-  };
 }
 
-export interface StoriesContext {
+export interface StoriesContext extends StylingProps {
   loader?: JSX.Element;
   stories: Story[][];
   loaded: boolean;

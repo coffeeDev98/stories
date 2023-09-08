@@ -33,6 +33,8 @@ const Video = (metadata: any) => (props: Props) => {
     fullscreenHandler,
     firstLoad,
     setFirstLoad,
+    styles,
+    icons,
   } = useContext<StoriesContext>(StoriesCtx);
 
   // useEffect(() => {
@@ -149,23 +151,26 @@ const Video = (metadata: any) => (props: Props) => {
         autoPlay
       />
 
-      <MediaControl>
+      <MediaControl style={{ ...styles?.mediaControls }}>
         <div id="prev" onClick={() => previous(true)}>
-          prev
+          {icons?.prev || "prev"}
         </div>
         <div id="play" onClick={() => action(pause ? "play" : "pause")}>
-          play
+          {pause ? icons?.play || "play" : icons?.pause || "pause"}
         </div>
         <div id="next" onClick={() => next(true)}>
-          next
+          {icons?.next || "next"}
         </div>
         <div id="volume" onClick={() => toggleMute()}>
-          volume
+          {muted ? icons?.mute || "unmute" : icons?.unmute || "mute"}
         </div>
         <div id="fullscreen" onClick={() => fullscreenHandler()}>
-          fullscreen
+          {fullscreen
+            ? icons?.shrink || "exit fullscreen"
+            : icons?.expand || "fullscreen"}
         </div>
       </MediaControl>
+
       {!loaded && (
         <div
           style={{
