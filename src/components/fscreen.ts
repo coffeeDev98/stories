@@ -55,7 +55,7 @@ const vendor =
 export default {
     requestFullscreen: (element:any) => element[vendor[key.requestFullscreen]]?.(),
     requestFullscreenFunction: (element:any) => element[vendor[key.requestFullscreen]],
-    get exitFullscreen() { return (document as any)[vendor[key.exitFullscreen]].bind(document); },
+    get exitFullscreen() { return (document as any)[vendor[key.exitFullscreen]]?.bind(document); },
     get fullscreenPseudoClass() { return `:${vendor[key.fullscreen]}`; },
     get fullscreenEnabled() { return Boolean((document as any)[vendor[key.fullscreenEnabled]]); },
     get fullscreenElement() { return (document as any)[vendor[key.fullscreenElement]]; },

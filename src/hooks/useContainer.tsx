@@ -15,6 +15,7 @@ import Video from "../components/Video";
 import useProgress from "./useProgress";
 import { styled } from "styled-components";
 import fscreen from "../components/fscreen";
+import { isMobile } from "../utils";
 
 const useContainer: (props: GlobalContext) => {
   cursor: Cursor;
@@ -120,6 +121,10 @@ const useContainer: (props: GlobalContext) => {
   }, [disableKeyEvent, stepDuration, clipDuration, pause]);
 
   const fullscreenHandler = () => {
+    if (isMobile() || window.innerWidth < 768) {
+      setFullscreen((prev) => !prev);
+      return;
+    }
     const storyContainer = document.getElementById("stories-container");
     if (document.fullscreenElement === null && storyContainer) {
       fscreen.requestFullscreen(storyContainer);
@@ -293,7 +298,18 @@ export const Content: FC<any> = ({
     // <FullScreen handle={handle}>
     <div
       id="stories-container"
-      style={{ ...defaultContainerStyles, ...styles?.container }}
+      style={{
+        ...defaultContainerStyles,
+        ...styles?.container,
+        ...(fullscreen && {
+          position: "fixed",
+          width: "100%",
+          height: "100vh",
+          inset: 0,
+          zIndex: 1005,
+          maxHeight: "100%",
+        }),
+      }}
     >
       {progressBar}
       <StoriesContext.Provider
